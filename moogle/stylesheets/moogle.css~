@@ -1,0 +1,20 @@
+
+body {
+	background-image: url("/images/cow-background.jpg");
+	background-repeat:repeat;
+}
+
+.transparent{
+	background:rgba(255,255,255,0.9);
+}
+
+.centered-div {
+	position: relative;
+  	top: 50%;
+  	transform: translateY(40%);
+}
+
+#logo {
+	max-width:75%;
+	max-height:75%;
+}

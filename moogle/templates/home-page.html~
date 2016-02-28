@@ -1,0 +1,15 @@
+<DOCTYPE! html>
+<html>
+	<head>
+	<link type="text/css" href="/stylesheets/moogle.css" rel="Stylesheet" />
+		<title>moogle</title>
+	</head>
+	<body>
+		<center>
+		<div class="transparent centered-div">
+			<a><img id="logo" src="/images/logo.png"/></a> <br><br>
+			<h1>COMING SOON!</h1>
+		</div>
+		<center/>
+	</body>
+</html>
