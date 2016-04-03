@@ -6,15 +6,19 @@ body {
 
 .transparent{
 	background:rgba(255,255,255,0.95);
-}
-
-.centered-div {
-	position: relative;
-  	top: 50%;
-  	transform: translateY(40%);
+	border: 1px solid black;
+	display:inline-block;
 }
 
 #logo {
 	max-width:75%;
 	max-height:75%;
+}
+
+.item_pic {
+	height: 200px;
+    width: 140px;
+    display: inline-block;
+    border-radius: 5px;
+	margin:15px;
 }

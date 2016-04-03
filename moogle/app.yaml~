@@ -5,6 +5,8 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /images
+  static_dir: images
 - url: /stylesheets
   static_dir: stylesheets
 - url: /.*
@@ -12,4 +14,9 @@ handlers:
 
 libraries:
 - name: jinja2
-  version: latest
+  version: "latest"
+- name: MySQLdb
+  version: "latest"
+  
+beta_settings:
+- cloud_sql_instances: moogle-store:us-central1:moogle-db3
