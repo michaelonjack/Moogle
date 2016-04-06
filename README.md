@@ -21,7 +21,7 @@ Once you get Ubuntu running on a virtual machine, follow these steps to run moog
 where path/to/goole_appengine is the path to the google_appengine directory which is on github inside the main directory
 and path/to/moogle is the path to the moogle directory which is also on github inside the main directory
 
-4.) If all goes well, this command should launch the application server which will continue to run until you press Ctrl-C
+4.) If all goes well, this command should launch the application server which will continue to run until you press Ctrl-C. You will probably be asked for a google email and password at this step, the email address is "mooglethestore@gmail.com" and then ask me for the password.
 
 You can now view the application on your local host which you can access at http://localhost:8080
 
