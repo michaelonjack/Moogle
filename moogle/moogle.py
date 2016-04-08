@@ -3,13 +3,17 @@ import cgi
 import jinja2
 import webapp2
 import MySQLdb
+import urllib
 from google.appengine.ext.webapp.util import run_wsgi_app
 from databasefunc import *
 
 template_dir = os.path.join(os.path.dirname(__file__),'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), extensions=['jinja2.ext.loopcontrols'],
         autoescape = True) #Jinja will now autoescape all html
-    
+
+def do_urlescape(value):
+    return urllib.quote(value.encode('utf8'))
+jinja_env.globals['urlencode'] = do_urlescape
         
 # THREE FUNCTIONS FOR RENDERING BASIC TEMPLATES
 class Handler(webapp2.RequestHandler):
@@ -31,11 +35,23 @@ current_user=-1
 # Home page
 class MainPage(Handler):
 	def get(self):
+		categories = getAllCategories()
 		items = getAllItems()
+		
+		self.render("category.html", currentCategory='All', items=items, categories=categories)
+
+
+
+
+class CategoryPage(Handler):
+	def get(self):
+		selectedCategory = self.request.get("cat")
 		categories = getAllCategories()
 		
-		self.render("home-page.html", items=items, categories=categories)
-
+		items = getAllItemsFromCategory(selectedCategory, categories)
+		
+		
+		self.render("category.html", currentCategory=selectedCategory, items=items, categories=categories)
 
 
 
@@ -77,6 +93,7 @@ class TestPagePost(Handler):
 
 application = webapp2.WSGIApplication([
 	('/', MainPage),
+	(r'/category.*', CategoryPage),
 	('/testget', TestPageGet),
 	('/testpost', TestPagePost),
 	], debug=True)

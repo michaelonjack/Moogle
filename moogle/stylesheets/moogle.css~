@@ -6,7 +6,9 @@ body {
 
 .transparent{
 	background:rgba(255,255,255,0.95);
+	border: 1px solid black;
 	display:inline-block;
+    border-radius: 5px;
 }
 
 #logo {
@@ -21,3 +23,16 @@ body {
     border-radius: 5px;
 	margin:15px;
 }
+
+table {
+	border:0px;
+	border-collapse:collapse;
+	border-spacing:0px;
+}
+
+td,img { 
+	padding:0px; 
+	border-width:0px; 
+	margin:0px; 
+}
+

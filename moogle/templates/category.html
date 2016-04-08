@@ -31,9 +31,21 @@
 		<!-- Login / Sign Up html -->
 		<div style="text-align:center">
 			<div class="transparent">
+				&nbsp;&nbsp;
 				<a href="">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a>
+				&nbsp;&nbsp;
 			</div>
 		</div>
+		
+		{% if currentCategory != 'All' %}
+		<br>
+		
+		<div style="text-align:center">
+			<div class="transparent">
+				<h3>&nbsp;&nbsp;&nbsp;{{currentCategory}}&nbsp;&nbsp;&nbsp;</h3>
+			</div>
+		</div>
+		{% endif %}
 		
 		<!-- HTML for the category list -->
 		<br>
@@ -42,9 +54,9 @@
 				<tbody>
 					<tr> <td> <h3>Category</h3> </td> </tr>
 					{% for category in categories %}
-						{% if category['parent'] == 'All' %}
+						{% if category['parent'] == currentCategory %}
 							<tr>
-								<td> <a href="/category?cat={{category['name']}}">{{ category['name'] }}</a> </td>
+								<td> <a href="/category?cat={{urlencode(category['name'])}}">{{ category['name'] }}</a> </td>
 							</tr>
 						{% endif %}
 					{% endfor %}
@@ -54,23 +66,23 @@
 		</div>
 		
 		<!-- HTML for the items -->
-		<div id="items-table" class="transparent" style="width:75%">
-			<table cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing: 0;">
+		<div id="items-table" class="transparent" style="width:65%">
+			<table style="width:100%" cellpadding="0" cellspacing="0">
 				<tbody>
 					<tr>
 					{% for item in items %}
 						
 						<td>
-						<div style="text-align:center;">
-							<a href="">
-							<figure>
-								<div class="icons"> <img class="item_pic" src="{{ item['image'] }}" /> </div>
-								<figcaption style="text-align: center;"> 
-									{{ item['title'] }} </a> <br>
-									({{ item['category'] }})
-								</figcaption>
-							</figure>
-						</div
+							<div style="text-align:center;">
+								<a href="">
+								<figure>
+									<div> <img class="item_pic" src="{{ item['image'] }}" /> </div>
+									<figcaption style="text-align: center;"> 
+										{{ item['title'] }} </a> <br>
+										({{ item['category'] }})
+									</figcaption>
+								</figure>
+							</div
 						</td>
 						
 						{% if loop.index%3 == 0 %}
@@ -86,7 +98,7 @@
 		
 	</body>
 	
-	
+	<br><br>
 	<footer>
 		<div style="text-align:center">
 			<div id="footer-table" class="transparent">

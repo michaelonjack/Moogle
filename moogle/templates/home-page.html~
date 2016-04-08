@@ -7,9 +7,11 @@
 		<title>moogle</title>
 		
 		<center>
+			<a href="/">
 			<div class="transparent" style="display:inline-block;">
 				<img width="450" height="150" src="/images/logo.png" onmouseover="this.src='/images/logo-jump.png'" onmouseout="this.src='/images/logo.png'"/>
 			</div>
+			</a>
 		</center>
 		
 	</head>
@@ -42,7 +44,7 @@
 					{% for category in categories %}
 						{% if category['parent'] == 'All' %}
 							<tr>
-								<td> <a href="">{{ category['name'] }}</a> </td>
+								<td> <a href="/category?cat={{category['name']}}">{{ category['name'] }}</a> </td>
 							</tr>
 						{% endif %}
 					{% endfor %}
@@ -53,7 +55,7 @@
 		
 		<!-- HTML for the items -->
 		<div id="items-table" class="transparent" style="width:75%">
-			<table style="width:100%">
+			<table style="width:100%; border-collapse:collapse; border-spacing: 0;">
 				<tbody>
 					<tr>
 					{% for item in items %}
@@ -100,12 +102,12 @@
 							<td> <a href="">Selling on Moogle</a> </td>
 							<td> <a href="">Your Account</a> </td>
 						</tr>
-						<tr>
+						<tr style="text-align:center">
 							<td> <a href="">Who's the Cow?</a> </td>
 							<td> <a href="">Sales vs. Auctions</a> </td>
 							<td> <a href="">Your Orders</a> </td>
 						</tr>
-						<tr>
+						<tr style="text-align:center">
 							<td> <a href="">Member of the Herd</a> </td>
 							<td> <a href="">Making/Receiving Payments</a> </td>
 							<td> <a href="">Your Watchlists</a> </td>
