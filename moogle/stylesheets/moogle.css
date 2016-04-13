@@ -24,3 +24,8 @@ body {
 	margin:15px;
 }
 
+#category-table ul{
+
+word-wrap: break-word;
+
+}
