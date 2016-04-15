@@ -24,8 +24,10 @@ body {
 	margin:15px;
 }
 
-#category-table ul{
+#category-table {
+	width:235px;
+}
 
-word-wrap: break-word;
-
+ul {
+	word-wrap: break-word;
 }

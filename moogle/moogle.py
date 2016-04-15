@@ -56,6 +56,34 @@ class CategoryPage(Handler):
 
 
 		
+
+class ItemPage(Handler):
+	def get(self):
+		item_id = str(self.request.get("id"))
+		sale_item = getSaleItem(item_id)
+		#similar_items = 
+		
+		# Check if the selected item was a sale item or auction item
+		if sale_item:
+			self.render("sale_item.html", item=sale_item[0])
+		else:
+			auction_item = getAuctionItem(item_id)
+			self.render("auction_item.html", item=auction_item[0])
+
+
+
+class LoginPage(Handler):
+	def get(self):
+		self.render("login.html")
+	
+	def post(self):
+		username = self.request.get('username')
+		password = self.request.get('password')
+
+
+
+
+
 class TestPageGet(Handler):
 	def write_form(self, items=None):
 		self.render("testing.html",items=items)
@@ -94,6 +122,8 @@ class TestPagePost(Handler):
 application = webapp2.WSGIApplication([
 	('/', MainPage),
 	(r'/category.*', CategoryPage),
+	(r'/item.*', ItemPage),
+	('/login', LoginPage),
 	('/testget', TestPageGet),
 	('/testpost', TestPagePost),
 	], debug=True)

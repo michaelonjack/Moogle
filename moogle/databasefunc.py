@@ -185,5 +185,58 @@ def getAllItemsFromCategory(category, allCategories):
 		
 	return items
 	
+
+
+def getSaleItem(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Sale_Items S INNER JOIN Items I on S.id=I.id AND S.id='" + item_id + "'")
 	
+	item = []
+	for row in cursor.fetchall():
+		item.append( 
+			dict([
+				('id', row[0]),
+				('price', row[1]),
+				('quantity', row[3]),
+				('category', cgi.escape(row[4])),
+				('description', cgi.escape(row[5])),
+				('image', cgi.escape(row[6])),
+				('title', cgi.escape(row[7]))
+			])
+		)
+				
+		
+	db.close()
+		
+	return item
+	
+
+def getAuctionItem(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Auction_Items A INNER JOIN Items I on A.id=I.id AND A.id='" + item_id + "'")
+	
+	item = []
+	for row in cursor.fetchall():
+		item.append( 
+			dict([
+				('id', row[0]),
+				('end_date', row[1]),
+				('reserve', row[2]),
+				('max_bid', row[3]),
+				('quantity', row[5]),
+				('category', cgi.escape(row[6])),
+				('description', cgi.escape(row[7])),
+				('image', cgi.escape(row[8])),
+				('title', cgi.escape(row[9]))
+			])
+		)
+				
+		
+	db.close()
+		
+	return item
+
+
 	

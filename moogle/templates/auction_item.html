@@ -15,92 +15,85 @@
 		</center>
 		
 	</head>
-	
+
 	<body>
-		
+
 		<!-- HTML for search bar / button -->
-		<div style="text-align:center">
-			<div id="search"> 
+		<div style="text-align:center;">
+			<div id="search">
 				<form>
 					<input type="text" name="searchBar">
-					<input type="submit" name="searchButton" value="search"> 
+					<input type="submit" name="searchButton" value="search">
 				</form>
 			</div>
 		</div>
-		
+
 		<!-- Login / Sign Up html -->
 		<div style="text-align:center">
 			<div class="transparent">
-				&nbsp;&nbsp;
-				<a href="/login">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a>
-				&nbsp;&nbsp;
+				<a href="">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a>
 			</div>
 		</div>
-		
-		{% if currentCategory != 'All' %}
-		<br>
-		
-		<div style="text-align:center">
-			<div class="transparent">
-				<h3>&nbsp;&nbsp;&nbsp;{{currentCategory}}&nbsp;&nbsp;&nbsp;</h3>
-			</div>
-		</div>
-		{% endif %}
-		
+
 		<!-- HTML for the category list -->
-		<br>
-		<div id="category-table" class="transparent" style="vertical-align:top;">
-			<table>
-				<tbody>
-					<tr> <td> <h3>Category</h3> </td> </tr>
-					{% for category in categories %}
-						{% if category['parent'] == currentCategory %}
-							<tr>
-								<td> <a href="/category?cat={{urlencode(category['name'])}}">{{ category['name'] }}</a> </td>
-							</tr>
-						{% endif %}
-					{% endfor %}
-					
-				</tbody>
-			</table>
-		</div>
-		
+			<br>
+			<div class="transparent" style="vertical-align:top;">
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<h3> {{ item['title'] }} </h3>
+							</td>
+
+							<td>
+									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ item['max_bid'] }}</h4>
+							</td>
+						</tr>
+								<tr>
+									<td> <img width="300" height="300" src="{{ item['image'] }}"/> </td>
+									<td>
+										Description:
+										<ul>
+											<li> {{ item['description'] }} </li>
+										</ul>
+											<input type="button" value="Place Bid" style="float: right; margin-right: 5.6em">
+											<input type="text" name="bid" value="14000" style="float: right;"/>
+
+									</td>
+								</tr>
+					</tbody>
+				</table>
+			</div>
+
 		<!-- HTML for the items -->
-		<div id="items-table" class="transparent" style="width:75%">
-			<table style="width:100%" cellpadding="0" cellspacing="0">
+		<div id="items-table" class="transparent" style="width:100%; height: 40%; margin-top: .6em">
+			<table cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing: 0;">
 				<tbody>
 					<tr>
-					{% for item in items %}
-						
+							<th> Related Items:</th>
+					</tr>
+					<tr>
+
+
 						<td>
-							<div style="text-align:center;">
-								<a href="/item?id={{ item['id'] }}">
-								<figure>
-									<div> <img class="item_pic" src="{{ item['image'] }}" /> </div>
-									<figcaption style="text-align: center;"> 
-										{{ item['title'] }} </a> <br>
-										({{ item['category'] }})
-									</figcaption>
-								</figure>
-							</div
+						<div style="text-align:center;">
+							<a href="">
+							<figure>
+								<div class="icons"> <img class="item_pic" src="" /> </div>
+							</figure>
+							</a>
+						</div
 						</td>
-						
-						{% if loop.index%3 == 0 %}
-							</tr> <tr>
-						{% endif %}
-						
-						{% if loop.index > 20 %}{% break %}{% endif %}
-					{% endfor %}
 					</tr>
 				</tbody>
 			</table>
 		</div>
-		
+
 	</body>
-	
-	<br><br>
+
+
 	<footer>
-		<div style="text-align:center">
+		<!-- <div style="text-align:center">
 			<div id="footer-table" class="transparent">
 				<table width="900">
 					<tbody>
@@ -126,8 +119,8 @@
 						</tr>
 					</tbody>
 				</table>
-			</div> 
-		</div>
+			</div>
+		</div> -->
 	</footer>
-	
+
 </html>
