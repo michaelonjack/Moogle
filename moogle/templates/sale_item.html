@@ -29,13 +29,26 @@
 		</div>
 
 		<!-- Login / Sign Up html -->
+		{% if user is none %}
 		<div style="text-align:center">
 			<div class="transparent">
-				<a href="">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a>
+				&nbsp;&nbsp;
+				<a href="/login">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a> 
+				&nbsp;&nbsp;
 			</div>
 		</div>
+		{% else %}
+		<div style="text-align:center">
+			<div class="transparent">
+				&nbsp;&nbsp;
+				<a href=""> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="">Sell</a> | <a href="">Herd Member</a> | <a href="/logout">Logout</a>
+				&nbsp;&nbsp;
+			</div>
+		</div>
+		{% endif %}
+		
+		<br>
 
-			<br>
 			<div class="transparent" style="vertical-align:top;">
 				<table>
 					<tbody>
@@ -62,30 +75,15 @@
 				</table>
 			</div>
 
-		<!-- HTML for the items -->
-		<div id="items-table" class="transparent" style="width:100%; height: 40%; margin-top: .6em">
+		<div class="transparent" style="width:100%; margin-top: .6em">
 			<table cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing: 0;">
 				<tbody>
 					<tr>
 							<th> Related Items:</th>
 					</tr>
 					<tr>
-
-
 						<td>
-						<div style="text-align:center;">
-							<a href="">
-							<figure>
-								<div class="icons"> <img class="item_pic"  /> </div>
-								<figcaption style="text-align: center;">
-
-								</figcaption>
-							</figure>
-						</div
 						</td>
-
-
-							</tr> <tr>
 					</tr>
 				</tbody>
 			</table>
@@ -93,7 +91,7 @@
 
 	</body>
 
-	<br>
+	<br><br>
 	<footer>
 		<div style="text-align:center">
 			<div id="footer-table" class="transparent">

@@ -29,13 +29,23 @@
 		</div>
 		
 		<!-- Login / Sign Up html -->
+		{% if user is none %}
 		<div style="text-align:center">
 			<div class="transparent">
 				&nbsp;&nbsp;
-				<a href="/login">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a>
+				<a href="/login">Log In</a> | <a href="">Sign Up</a> | <a href="">Herd Member</a> 
 				&nbsp;&nbsp;
 			</div>
 		</div>
+		{% else %}
+		<div style="text-align:center">
+			<div class="transparent">
+				&nbsp;&nbsp;
+				<a href=""> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="">Sell</a> | <a href="">Herd Member</a> | <a href="/logout">Logout</a>
+				&nbsp;&nbsp;
+			</div>
+		</div>
+		{% endif %}
 		
 		{% if currentCategory != 'All' %}
 		<br>
@@ -66,14 +76,14 @@
 		</div>
 		
 		<!-- HTML for the items -->
-		<div id="items-table" class="transparent" style="width:75%">
-			<table style="width:100%" cellpadding="0" cellspacing="0">
+		<div id="items-table" class="transparent">
+			<table style="border-collapse: collapse;">
 				<tbody>
 					<tr>
 					{% for item in items %}
 						
 						<td>
-							<div style="text-align:center;">
+							<div style="text-align:center; display:table; width:1px;">
 								<a href="/item?id={{ item['id'] }}">
 								<figure>
 									<div> <img class="item_pic" src="{{ item['image'] }}" /> </div>
@@ -85,11 +95,11 @@
 							</div
 						</td>
 						
-						{% if loop.index%3 == 0 %}
+						{% if loop.index%4 == 0 %}
 							</tr> <tr>
 						{% endif %}
 						
-						{% if loop.index > 20 %}{% break %}{% endif %}
+						{% if loop.index > 19 %}{% break %}{% endif %}
 					{% endfor %}
 					</tr>
 				</tbody>

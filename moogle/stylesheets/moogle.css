@@ -25,9 +25,15 @@ body {
 }
 
 #category-table {
-	width:235px;
+	width:200px;
 }
 
 ul {
 	word-wrap: break-word;
+}
+
+figure {
+	display: block;
+	margin: 5px;
+	padding:5px;
 }

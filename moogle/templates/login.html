@@ -9,7 +9,7 @@
 	<body>
 		<br><br><br>
 		<center>
-			<div class="transparent" style="display:inline-block; width:400px; height:520px;">
+			<div class="transparent" style="display:inline-block; width:400px; height:550px;">
 				<form method="post">
 					<center>
 						<h2>login.</h3>
@@ -27,11 +27,18 @@
 						<input type="password" name="password" style="border: 1px solid black; border-radius: 5px;">
 						</div>
 						
-						<br> <br>
-						<div><input type="submit" value="enter"></div>
+						<br>
+						
+						<font color="red">{{ error_msg }}</font>
 						
 						<br> <br>
-						<img src="/images/cow_shades.png" />
+						<div>
+							<input type="submit" value="enter"> <br>
+							<a href="/signup">Sign Up</a>
+						</div>
+						
+						<br> <br>
+						<a href="/"> <img src="/images/cow_shades.png" /> </a>
 						
 						<br><br><br><br>
 					</center>

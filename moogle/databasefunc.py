@@ -237,6 +237,30 @@ def getAuctionItem(item_id):
 	db.close()
 		
 	return item
+	
+	
+	
+def login(username, password):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Users WHERE username='" + username + "' AND password='" + password + "'")
+	
+	row = cursor.fetchone()
+	if row is not None:
+		user = dict([
+			('name', row[0]),
+			('email', row[1]),
+			('herd_member', row[2]),
+			('income', row[3]),
+			('gender', row[4]),
+			('username', row[5]),
+			('password', row[6]),
+			#('birth_date', row[7])
+		])
+		return user
+		
+	return None
+	
 
 
 	

@@ -24,15 +24,26 @@ body {
 	margin:15px;
 }
 
-table {
-	border:0px;
-	border-collapse:collapse;
-	border-spacing:0px;
+#category-table {
+	width:200px;
+	vertical-align:top;
+	display: inline;
 }
 
-td,img { 
-	padding:0px; 
-	border-width:0px; 
-	margin:0px; 
+#items-table {
+	display: inline;
 }
 
+#container {
+	text-align:center;
+}
+
+ul {
+	word-wrap: break-word;
+}
+
+figure {
+	display: block;
+	margin: 5px;
+	padding:5px;
+}
