@@ -21,8 +21,8 @@
 		<!-- HTML for search bar / button -->
 		<div style="text-align:center">
 			<div id="search"> 
-				<form>
-					<input type="text" name="searchBar">
+				<form action="/search?cat={{urlencode(currentCategory)}}" method="post">
+					<input type="text" name="query">
 					<input type="submit" name="searchButton" value="search"> 
 				</form>
 			</div>
@@ -81,7 +81,6 @@
 				<tbody>
 					<tr>
 					{% for item in items %}
-						
 						<td>
 							<div style="text-align:center; display:table; width:1px;">
 								<a href="/item?id={{ item['id'] }}">

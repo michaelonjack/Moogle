@@ -21,8 +21,8 @@
 		<!-- HTML for search bar / button -->
 		<div style="text-align:center;">
 			<div id="search">
-				<form>
-					<input type="text" name="searchBar">
+				<form action="/search" method="post">
+					<input type="text" name="query">
 					<input type="submit" name="searchButton" value="search">
 				</form>
 			</div>
@@ -46,6 +46,12 @@
 			</div>
 		</div>
 		{% endif %}
+		<br>
+		<div style="text-align:center">
+			<div class="transparent">
+				<h3>&nbsp;&nbsp;&nbsp;Fixed Price&nbsp;&nbsp;&nbsp;</h3>
+			</div>
+		</div>
 		
 		<br>
 
@@ -76,14 +82,27 @@
 			</div>
 
 		<div class="transparent" style="width:100%; margin-top: .6em">
-			<table cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing: 0;">
+			<table style="border-collapse: collapse;">
 				<tbody>
 					<tr>
 							<th> Related Items:</th>
 					</tr>
 					<tr>
+						{% for related_item in related_items %}
 						<td>
+							<div style="text-align:center; display:table; width:1px;">
+								<a href="/item?id={{ related_item['id'] }}">
+								<figure>
+									<div> <img class="item_pic" src="{{ related_item['image'] }}" /> </div>
+									<figcaption style="text-align: center;"> 
+										{{ related_item['title'] }} </a> <br>
+										({{ related_item['category'] }})
+									</figcaption>
+								</figure>
+							</div>
 						</td>
+							{% if loop.index > 5 %}{% break %}{% endif %}
+						{% endfor %}
 					</tr>
 				</tbody>
 			</table>

@@ -21,8 +21,8 @@
 		<!-- HTML for search bar / button -->
 		<div style="text-align:center;">
 			<div id="search">
-				<form>
-					<input type="text" name="searchBar">
+				<form action="/search" method="post">
+					<input type="text" name="query">
 					<input type="submit" name="searchButton" value="search">
 				</form>
 			</div>
@@ -46,6 +46,12 @@
 			</div>
 		</div>
 		{% endif %}
+		<br>
+		<div style="text-align:center">
+			<div class="transparent">
+				<h3>&nbsp;&nbsp;&nbsp;Auction&nbsp;&nbsp;&nbsp;</h3>
+			</div>
+		</div>
 
 		<br>
 
@@ -60,16 +66,19 @@
 							<td>
 									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ item['max_bid'] }}</h4>
 							</td>
+							<td>
+									<h4 style="float: right; margin-right: 2.6em">Ending On: {{ item['end_date'] }}</h4>
+							</td>
 						</tr>
 								<tr>
-									<td> <img width="300" height="300" src="{{ item['image'] }}"/> </td>
+									<td> <img class="item_pic" src="{{ item['image'] }}"/> </td>
 									<td>
 										Description:
 										<ul>
 											<li> {{ item['description'] }} </li>
 										</ul>
 											<input type="button" value="Place Bid" style="float: right; margin-right: 5.6em">
-											<input type="text" name="bid" value="14000" style="float: right;"/>
+											<input type="text" name="bid" style="float: right;"/>
 
 									</td>
 								</tr>
@@ -78,13 +87,27 @@
 			</div>
 
 		<div class="transparent" style="width:100%; margin-top: .6em">
-			<table cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing: 0;">
+			<table style="border-collapse: collapse;">
 				<tbody>
 					<tr>
 							<th> Related Items:</th>
 					</tr>
 					<tr>
-					
+						{% for related_item in related_items %}
+						<td>
+							<div style="text-align:center; display:table; width:1px;">
+								<a href="/item?id={{ related_item['id'] }}">
+								<figure>
+									<div> <img class="item_pic" src="{{ related_item['image'] }}" /> </div>
+									<figcaption style="text-align: center;"> 
+										{{ related_item['title'] }} </a> <br>
+										({{ related_item['category'] }})
+									</figcaption>
+								</figure>
+							</div>
+						</td>
+							{% if loop.index > 5 %}{% break %}{% endif %}
+						{% endfor %}
 					</tr>
 				</tbody>
 			</table>

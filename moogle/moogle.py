@@ -4,6 +4,7 @@ import jinja2
 import webapp2
 import MySQLdb
 import urllib
+import random
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from webapp2_extras import sessions
@@ -48,7 +49,7 @@ class Handler(webapp2.RequestHandler):
     
 
 
-############################################################################################################
+######################################################################################################################
 
 
 
@@ -58,8 +59,10 @@ class MainPage(Handler):
 		categories = getAllCategories()
 		items = getAllItems()
 		
+		# Randomize the items to be shown
+		random.shuffle(items)
+		
 		self.render("category.html", currentCategory='All', items=items, categories=categories, user=self.session.get('user'))
-
 
 
 
@@ -67,8 +70,10 @@ class CategoryPage(Handler):
 	def get(self):
 		selectedCategory = self.request.get("cat")
 		categories = getAllCategories()
-		
 		items = getAllItemsFromCategory(selectedCategory, categories)
+		
+		# Randomize the items to be shown
+		random.shuffle(items)
 		
 		self.render("category.html", currentCategory=selectedCategory, items=items, categories=categories, user=self.session.get('user'))
 
@@ -80,14 +85,23 @@ class ItemPage(Handler):
 	def get(self):
 		item_id = str(self.request.get("id"))
 		sale_item = getSaleItem(item_id)
-		#similar_items = 
+		categories = getAllCategories()
 		
 		# Check if the selected item was a sale item or auction item
 		if sale_item:
-			self.render("sale_item.html", item=sale_item[0], user=self.session.get('user'))
+			similar_items = getAllItemsFromCategory(sale_item[0]['category'], categories)
+			# Randomize the items to be shown
+			random.shuffle(similar_items)
+			
+			self.render("sale_item.html", item=sale_item[0], related_items=similar_items, user=self.session.get('user'))
+		
 		else:
 			auction_item = getAuctionItem(item_id)
-			self.render("auction_item.html", item=auction_item[0], user=self.session.get('user'))
+			similar_items = getAllItemsFromCategory(auction_item[0]['category'], categories)
+			# Randomize the items to be shown
+			random.shuffle(similar_items)
+			
+			self.render("auction_item.html", item=auction_item[0], related_items=similar_items, user=self.session.get('user'))
 
 
 
@@ -116,6 +130,30 @@ class LogoutPage(Handler):
 
 
 
+# Action to be performed when a user enters a search query
+class SearchStore(Handler):
+	def post(self):
+		query = cgi.escape(self.request.get('query'))
+		category = cgi.escape(self.request.get('cat'))
+		allCategories = getAllCategories()
+		
+		if not category:
+			allItems = getAllItems()
+		else:
+			allItems = getAllItemsFromCategory(category, allCategories)
+		
+		displayedItems = []
+		for item in allItems:
+			if query.lower() in item['title'].lower():
+				displayedItems.append(item)
+		
+		if not category:		
+			self.render("category.html", currentCategory='All', items=displayedItems, categories=allCategories, user=self.session.get('user'))
+		
+		else:
+			self.render("category.html", currentCategory=category, items=displayedItems, categories=allCategories, user=self.session.get('user'))
+
+
 class TestPagePost(Handler):
 	def get(self):
 		self.render("testing-post.html")
@@ -136,6 +174,16 @@ class TestPagePost(Handler):
 
 
 
+
+
+
+
+
+######################################################################################################################
+
+# Map the class handlers to their URLs
+
+
 config = {}
 config['webapp2_extras.sessions'] = {
 	'secret_key': 'my_secret_key',
@@ -146,6 +194,7 @@ application = webapp2.WSGIApplication([
 	(r'/item.*', ItemPage),
 	('/login', LoginPage),
 	('/logout', LogoutPage),
+	('/search', SearchStore),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	
