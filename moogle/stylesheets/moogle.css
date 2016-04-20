@@ -24,6 +24,14 @@ body {
 	margin:15px;
 }
 
+.big_item_pic {
+	height: 300px;
+    width: 210px;
+    display: inline-block;
+    border-radius: 5px;
+	margin:15px;
+}
+
 #category-table {
 	width:200px;
 }

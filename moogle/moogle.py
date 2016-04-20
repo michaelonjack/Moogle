@@ -7,6 +7,7 @@ import urllib
 import random
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
+from google.appengine.api import mail
 from webapp2_extras import sessions
 from databasefunc import *
 
@@ -129,6 +130,32 @@ class LogoutPage(Handler):
 		self.redirect("/")
 
 
+class SignupPage(Handler):
+	def get(self):
+		self.render("signup.html",msg="")
+	def post(self):
+		name = cgi.escape(self.request.get('fullname'))
+		email = cgi.escape(self.request.get('email'))
+		birthdate = cgi.escape(self.request.get('year')) + '-' + cgi.escape(self.request.get('month')) + '-' + cgi.escape(self.request.get('day'))
+		username = cgi.escape(self.request.get('username'))
+		password = cgi.escape(self.request.get('password'))
+		street = cgi.escape(self.request.get('street'))
+		city = cgi.escape(self.request.get('city'))
+		state = cgi.escape(self.request.get('state'))
+		zipcode = cgi.escape(self.request.get('zipcode'))
+		phone = cgi.escape(self.request.get('phone'))
+		card_num = cgi.escape(self.request.get('card_num'))
+		card_type = cgi.escape(self.request.get('card_type'))
+		income = cgi.escape(self.request.get('income'))
+		gender = cgi.escape(self.request.get('gender'))
+		
+		if insertIntoUsers(name, email, float(income), gender, username, password, birthdate):
+			message = "Hi " + name + "! Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username
+			mail.send_mail(sender="mooglethestore@gmail.com",to=email,subject="Hi from Moogle!",body=message)
+			self.redirect("/")
+		else:
+			self.render("signup.html",msg="USERNAME ALREADY IN USE")
+
 
 # Action to be performed when a user enters a search query
 class SearchStore(Handler):
@@ -194,6 +221,7 @@ application = webapp2.WSGIApplication([
 	(r'/item.*', ItemPage),
 	('/login', LoginPage),
 	('/logout', LogoutPage),
+	('/signup', SignupPage),
 	('/search', SearchStore),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)

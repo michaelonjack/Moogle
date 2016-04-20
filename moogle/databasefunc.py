@@ -86,6 +86,24 @@ def getAllSaleItems():
 
 
 
+def insertIntoSaleItems(_id, price):
+	db = getDatabase()
+	cursor = db.cursor()
+    # Note that the only format specifier supported is %s
+	cursor.execute('INSERT INTO Sale_Items (id, price) VALUES (%s, %s)', (_id, price))
+	
+	db.commit()
+	db.close()
+
+
+def insertIntoAuctionItems(_id, end_date, reserve):
+	db = getDatabase()
+	cursor = db.cursor()
+    # Note that the only format specifier supported is %s
+	cursor.execute('INSERT INTO Auction_Items (id, end_date, reserve) VALUES (%s, %s, %s)', (_id, end_date, reserve))
+	
+	db.commit()
+	db.close()
 
 
 # Func to insert an item into the database
@@ -101,9 +119,21 @@ def insertIntoItems(quantity, category, description, image, title):
 	
 	
 	
+def insertIntoUsers(name, email, income, gender, username, password, birthdate):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Users WHERE username='" + username + "'")
 
-
-
+	# User already exists
+	if len(cursor.fetchall()) > 0:
+		return False
+		
+	else:
+		cursor.execute('INSERT INTO Users (name, email, herd_member, income, gender, username, password, birth_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (name, email, 0, (float(income)), gender, username, password, birthdate))
+	
+	db.commit()
+	db.close()
+	return True
 
 
 # Func to get all categories from the database
