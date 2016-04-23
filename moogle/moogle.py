@@ -99,10 +99,29 @@ class ItemPage(Handler):
 		else:
 			auction_item = getAuctionItem(item_id)
 			similar_items = getAllItemsFromCategory(auction_item[0]['category'], categories)
+			max_bid = getBidForItem(item_id)
+			seller = getSellerOfItem(item_id)
+			
 			# Randomize the items to be shown
 			random.shuffle(similar_items)
 			
-			self.render("auction_item.html", item=auction_item[0], related_items=similar_items, user=self.session.get('user'))
+			self.render("auction_item.html", item=auction_item[0], related_items=similar_items, user=self.session.get('user'), max_bid=max_bid, seller=seller)
+
+
+
+
+
+
+
+class SellItemPage(Handler):
+	def get(self):
+		self.render("sale_post.html")
+
+
+
+
+
+
 
 
 
@@ -124,10 +143,18 @@ class LoginPage(Handler):
 
 
 
+
+
+
 class LogoutPage(Handler):
 	def get(self):
 		self.session['user'] = None
 		self.redirect("/")
+
+
+
+
+
 
 
 class SignupPage(Handler):
@@ -146,22 +173,47 @@ class SignupPage(Handler):
 		phone = cgi.escape(self.request.get('phone'))
 		card_num = cgi.escape(self.request.get('card_num'))
 		card_type = cgi.escape(self.request.get('card_type'))
+		card_expr_date = cgi.escape(self.request.get('card_year')) + '-' + cgi.escape(self.request.get('card_month'))
 		income = cgi.escape(self.request.get('income'))
 		gender = cgi.escape(self.request.get('gender'))
 		
-		if insertIntoUsers(name, email, float(income), gender, username, password, birthdate):
-			message = "Hi " + name + "! Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username
+		if not username or not password or not email or not birthdate or not name or not street or not city or not state or not zipcode or not phone or not card_num or not card_type or not income or not gender:
+			self.render("signup.html",msg="DID NOT FILL IN ALL REQUIRED FIELDS")
+		elif insertIntoUsers(name, email, float(income), gender, username, password, birthdate):
+			
+			# insert into address database
+			insertIntoUserAddress(username, street, zipcode)
+			
+			# insert into credit card database
+			insertIntoUserCreditCard(username, card_num, card_type, card_expr_date)
+			
+			# insert into phone number database
+			insertIntoUserPhoneNumber(username, phone)
+			
+			# insert into zipcodes database
+			insertIntoZipcodeArea(zipcode, city, state)
+			
+			# Send email
+			message = "Hi " + name + "! Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username + "\nhttp://moogle-store.appspot.com"
 			mail.send_mail(sender="mooglethestore@gmail.com",to=email,subject="Hi from Moogle!",body=message)
 			self.redirect("/")
 		else:
 			self.render("signup.html",msg="USERNAME ALREADY IN USE")
 
 
+
+
+
+
+
+
+
+
 # Action to be performed when a user enters a search query
-class SearchStore(Handler):
+class SearchStoreAction(Handler):
 	def post(self):
 		query = cgi.escape(self.request.get('query'))
-		category = cgi.escape(self.request.get('cat'))
+		category = self.request.get('cat')
 		allCategories = getAllCategories()
 		
 		if not category:
@@ -179,6 +231,65 @@ class SearchStore(Handler):
 		
 		else:
 			self.render("category.html", currentCategory=category, items=displayedItems, categories=allCategories, user=self.session.get('user'))
+
+
+
+
+
+
+
+# Action to be performed when a user places a bid
+class PlaceBidAction(Handler):
+	def post(self):
+	
+		if not self.session.get('user'):
+			self.redirect('/login')
+	
+		seller = cgi.escape(self.request.get('user'))
+		item_id = int(self.request.get('item'))
+		bidder = self.session.get('user')
+		
+		current_max_bid = getBidForItem(item_id)
+		if not current_max_bid:
+			current_max_bid = 0.0
+		else:
+			current_max_bid = float(current_max_bid['amount'])
+		
+		bid = self.request.get('bid')
+		if not bid:
+			bid = 0.0
+		else:
+			bid = float(bid)
+
+		# get item from database
+		item = getAuctionItem(item_id)
+	
+		if not bid:
+			self.render('message.html', message="No bid entered.")
+		elif bid <= current_max_bid:
+			self.render('message.html', message="Bid must be higher than current bid.")
+		elif bidder['username'] == seller:
+			self.render('message.html', message="Seller cannot bid on their own items.")
+		else:
+			insertBid(bidder['username'], item_id, bid)
+			bid = getBidForItem(item_id)
+			updateAuctionBid(item_id, bid['id'])
+			self.redirect("/item?id=" + str(item_id))
+
+
+
+
+
+
+
+# Action to be performed when user buys an item
+
+
+
+
+
+
+
 
 
 class TestPagePost(Handler):
@@ -219,10 +330,12 @@ application = webapp2.WSGIApplication([
 	('/', MainPage),
 	(r'/category.*', CategoryPage),
 	(r'/item.*', ItemPage),
+	('/sellitem', SellItemPage),
 	('/login', LoginPage),
 	('/logout', LogoutPage),
 	('/signup', SignupPage),
-	('/search', SearchStore),
+	('/search', SearchStoreAction),
+	('/placebid', PlaceBidAction),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	

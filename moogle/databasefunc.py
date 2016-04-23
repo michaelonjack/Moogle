@@ -83,6 +83,42 @@ def getAllSaleItems():
 	db.close()
 		
 	return items
+	
+	
+	
+	
+	
+	
+def getAllAuctionItems():
+
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute('SELECT * FROM Auction_Items A INNER JOIN Items I on A.id=I.id;')
+		
+	items = []
+	for row in cursor.fetchall():
+		items.append( 
+			dict([
+				('id', row[0]),
+				('end_date', row[1]),
+				('reserve', row[2]),
+				('max_bid', row[3]),
+				('quantity', row[5]),
+				('category', cgi.escape(row[6])),
+				('description', cgi.escape(row[7])),
+				('image', cgi.escape(row[8])),
+				('title', cgi.escape(row[9]))
+			])
+		)
+				
+		
+	db.close()
+		
+	return items
+
+	
+	
+
 
 
 
@@ -90,20 +126,40 @@ def insertIntoSaleItems(_id, price):
 	db = getDatabase()
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
-	cursor.execute('INSERT INTO Sale_Items (id, price) VALUES (%s, %s)', (_id, price))
+	cursor.execute('INSERT INTO Sale_Items (id, price) VALUES (%s, %s)', (int(_id), float(price)))
 	
 	db.commit()
 	db.close()
+
+
+
+
+
+def insertIntoUsersSelling(username, item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('INSERT INTO Users_Selling (user, item_id) VALUES (%s, %s)', (username, int(item_id)))
+
+	db.commit()
+	db.close()
+
+
 
 
 def insertIntoAuctionItems(_id, end_date, reserve):
 	db = getDatabase()
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
-	cursor.execute('INSERT INTO Auction_Items (id, end_date, reserve) VALUES (%s, %s, %s)', (_id, end_date, reserve))
+	cursor.execute('INSERT INTO Auction_Items (id, end_date, reserve) VALUES (%s, %s, %s)', (int(_id), end_date, float(reserve)))
 	
 	db.commit()
 	db.close()
+
+
+
+
+
 
 
 # Func to insert an item into the database
@@ -117,8 +173,89 @@ def insertIntoItems(quantity, category, description, image, title):
 	db.commit()
 	db.close()
 	
+
+
+
+
+def updateAuctionBid(item_id, bid_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('UPDATE Auction_Items SET max_bid=%s WHERE id=%s', (int(bid_id), int(item_id)))
+	
+	db.commit()
+	db.close()
 	
 	
+
+
+
+
+def insertBid(username, item, amount):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT * FROM Bids WHERE username=%s AND item=%s', (username, int(item)))
+	
+	# A bid for this item already exists, update the amount
+	if len(cursor.fetchall()) > 0:
+		cursor.execute('UPDATE Bids SET amount=%s, username=%s WHERE item=%s', (float(amount), username, int(item)))
+	# No bids for this item yet, enter it into the table
+	else:
+		cursor.execute('INSERT INTO Bids (username,item,amount) VALUES (%s,%s,%s)', (username, int(item), float(amount)))
+	
+	db.commit()
+	db.close()
+	
+
+
+
+
+def getSellerOfItem(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT * FROM Users_Selling WHERE item_id=%s', (int(item_id)))
+	
+	row = cursor.fetchone()
+	if row is not None:
+		seller = row[0]
+		
+		db.close()
+		return seller
+	
+	db.close()
+	return None
+
+
+
+
+
+def getBidForItem(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT * FROM Bids WHERE item=%s', (int(item_id)))
+	
+	row = cursor.fetchone()
+	if row is not None:
+		bid = dict([
+			('bidder', row[0]),
+			('item_id', row[1]),
+			('amount', row[2]),
+			('time', row[3]),
+			('id', row[4])
+		])
+		db.close()
+		return bid
+	
+	db.close()
+	return None
+
+
+
+
+
 def insertIntoUsers(name, email, income, gender, username, password, birthdate):
 	db = getDatabase()
 	cursor = db.cursor()
@@ -134,6 +271,79 @@ def insertIntoUsers(name, email, income, gender, username, password, birthdate):
 	db.commit()
 	db.close()
 	return True
+	
+	
+
+
+
+
+def insertIntoUserAddress(username, street, zipcode):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('INSERT INTO User_Address (username, street, zipcode) VALUES (%s, %s, %s)', (username,street,zipcode))
+	
+	db.commit()
+	db.close()
+	
+
+
+
+
+
+
+def insertIntoUserPhoneNumber(username, number):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('INSERT INTO User_PhoneNumber (username, phone_number) VALUES (%s, %s)', (username,number))
+	
+	db.commit()
+	db.close()
+	
+
+
+
+
+def insertIntoUserCreditCard(username, number, card_type, date):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('INSERT INTO User_CreditCard (username, number, type, expiration_date) VALUES (%s, %s, %s, %s)', (username,number,card_type,date))
+	
+	db.commit()
+	db.close()
+	
+
+
+
+
+
+
+def insertIntoZipcodeArea(zipcode, city, state):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Zipcodes_Areas WHERE zipcode='" + zipcode + "'")
+
+	# Zipcode already exists
+	if len(cursor.fetchall()) > 0:
+		db.close()
+		return False
+	
+	
+	cursor.execute("INSERT INTO Zipcodes_Areas (zipcode, city, state) VALUES (%s, %s, %s)", (zipcode,city,state))
+	
+	db.commit()
+	db.close()
+	return True
+
+
+
+
+
+
+
+
 
 
 # Func to get all categories from the database
@@ -220,7 +430,7 @@ def getAllItemsFromCategory(category, allCategories):
 def getSaleItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Sale_Items S INNER JOIN Items I on S.id=I.id AND S.id='" + item_id + "'")
+	cursor.execute("SELECT * FROM Sale_Items S INNER JOIN Items I on S.id=I.id AND S.id='" + str(item_id) + "'")
 	
 	item = []
 	for row in cursor.fetchall():
@@ -245,7 +455,7 @@ def getSaleItem(item_id):
 def getAuctionItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Auction_Items A INNER JOIN Items I on A.id=I.id AND A.id='" + item_id + "'")
+	cursor.execute("SELECT * FROM Auction_Items A INNER JOIN Items I on A.id=I.id AND A.id='" + str(item_id) + "'")
 	
 	item = []
 	for row in cursor.fetchall():
@@ -268,7 +478,16 @@ def getAuctionItem(item_id):
 		
 	return item
 	
+
+def getItemSeller(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute('SELECT user FROM Users_Selling WHERE item_id='+str(item_id))
 	
+	row = cursor.fetchone()
+	user = row[0]
+	return user
+
 	
 def login(username, password):
 	db = getDatabase()

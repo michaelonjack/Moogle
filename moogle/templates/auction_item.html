@@ -62,9 +62,11 @@
 							<td>
 								<h3> {{ item['title'] }} </h3>
 							</td>
-
 							<td>
-									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ item['max_bid'] }}</h4>
+									<h4 style="float: right; margin-right: 2.6em">Seller: {{ seller }}</h4>
+							</td>
+							<td>
+									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ max_bid['amount'] }}</h4>
 							</td>
 							<td>
 									<h4 style="float: right; margin-right: 2.6em">Ending On: {{ item['end_date'] }}</h4>
@@ -77,8 +79,10 @@
 										<ul>
 											<li> {{ item['description'] }} </li>
 										</ul>
-											<input type="button" value="Place Bid" style="float: right; margin-right: 5.6em">
-											<input type="text" name="bid" style="float: right;"/>
+											<form method="post" action="/placebid?user={{seller}}&item={{item['id']}}">
+												<input type="submit" value="Place Bid" style="float: right; margin-right: 5.6em">
+												<input type="text" name="bid" style="float: right;"/>
+											</form>
 
 									</td>
 								</tr>
