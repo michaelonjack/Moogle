@@ -44,7 +44,7 @@ def getAllItems():
 				('category', cgi.escape(row[2])),
 				('description', cgi.escape(row[3])),
 				('image', cgi.escape(row[4])),
-				('title', cgi.escape(row[5]))
+				('title', row[5])
 			])
 		)
 				
@@ -105,9 +105,9 @@ def getAllAuctionItems():
 				('max_bid', row[3]),
 				('quantity', row[5]),
 				('category', cgi.escape(row[6])),
-				('description', cgi.escape(row[7])),
+				('description', row[7]),
 				('image', cgi.escape(row[8])),
-				('title', cgi.escape(row[9]))
+				('title', row[9])
 			])
 		)
 				
@@ -140,6 +140,17 @@ def insertIntoUsersSelling(username, item_id):
 	cursor = db.cursor()
 	
 	cursor.execute('INSERT INTO Users_Selling (user, item_id) VALUES (%s, %s)', (username, int(item_id)))
+
+	db.commit()
+	db.close()
+	
+	
+
+def insertIntoUsersBuying(username, item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('INSERT INTO Users_Buying (user, item_id) VALUES (%s, %s)', (username, int(item_id)))
 
 	db.commit()
 	db.close()
@@ -414,9 +425,9 @@ def getAllItemsFromCategory(category, allCategories):
 					('id', row[0]),
 					('quantity', row[1]),
 					('category', cgi.escape(row[2])),
-					('description', cgi.escape(row[3])),
+					('description', row[3]),
 					('image', cgi.escape(row[4])),
-					('title', cgi.escape(row[5]))
+					('title', row[5])
 				])
 			)
 				
@@ -424,7 +435,58 @@ def getAllItemsFromCategory(category, allCategories):
 	db.close()
 		
 	return items
+
+
+def getUser(username):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Users U INNER JOIN User_Address A on U.username=A.username AND U.username=%s INNER JOIN User_PhoneNumber P on U.username=P.username INNER JOIN Zipcodes_Areas Z on Z.zipcode=A.zipcode INNER JOIN User_CreditCard C on C.username=U.username", (username))
 	
+	row = cursor.fetchone()
+	if row is not None:
+		user = dict([
+					('name', row[0]),
+					('email', row[1]),
+					('herd_member', row[2]),
+					('income', row[3]),
+					('gender', row[4]),
+					('username', row[5]),
+					('password', row[6]),
+					('birth_date', str(row[7])),
+					('street', row[9]),
+					('zipcode', row[10]),
+					('phone_number', row[12]),
+					('city', row[14]),
+					('state', row[15]),
+					('card_number', row[17]),
+					('card_type', row[18]),
+					('card_expr', str(row[19]))
+				])
+		db.close
+		return user
+				
+	else:
+		cursor.execute("SELECT * FROM Users WHERE username='" + username + "'")
+	
+		row = cursor.fetchone()
+		if row is not None:
+			user = dict([
+						('name', row[0]),
+						('email', row[1]),
+						('herd_member', row[2]),
+						('income', row[3]),
+						('gender', row[4]),
+						('username', row[5]),
+						('password', row[6]),
+						('birth_date', str(row[7]))
+					])
+		db.close
+		return user
+		
+	return None
+	
+				
+				
 
 
 def getSaleItem(item_id):
@@ -442,7 +504,7 @@ def getSaleItem(item_id):
 				('category', cgi.escape(row[4])),
 				('description', cgi.escape(row[5])),
 				('image', cgi.escape(row[6])),
-				('title', cgi.escape(row[7]))
+				('title', row[7])
 			])
 		)
 				
@@ -479,6 +541,11 @@ def getAuctionItem(item_id):
 	return item
 	
 
+
+
+
+
+
 def getItemSeller(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
@@ -489,6 +556,30 @@ def getItemSeller(item_id):
 	return user
 
 	
+
+
+
+
+def decreaseItemQuantity(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute('SELECT quantity FROM Items WHERE id=%s', (int(item_id)))
+	quantity = cursor.fetchone()[0]
+	
+	# Check to make sure there is more than one of the item, otherwise delete it from the table
+	if quantity > 1:
+		cursor.execute('UPDATE Items SET quantity=quantity-1 WHERE id=%s', (item_id))
+	else:
+		cursor.execute('DELETE FROM Items WHERE id=%s', (int(item_id)))
+
+	db.commit()
+	db.close()
+
+
+
+
+
+
 def login(username, password):
 	db = getDatabase()
 	cursor = db.cursor()
@@ -496,17 +587,7 @@ def login(username, password):
 	
 	row = cursor.fetchone()
 	if row is not None:
-		user = dict([
-			('name', row[0]),
-			('email', row[1]),
-			('herd_member', row[2]),
-			('income', row[3]),
-			('gender', row[4]),
-			('username', row[5]),
-			('password', row[6]),
-			#('birth_date', row[7])
-		])
-		return user
+		return row[5] #username
 		
 	return None
 	

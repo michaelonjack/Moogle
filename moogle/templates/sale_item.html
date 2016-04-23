@@ -62,7 +62,9 @@
 							<td>
 								<h3>{{ item['title'] }}</h3>
 							</td>
-
+							<td>
+									<h4 style="float: right; margin-right: 2.6em">Quantity: {{ item['quantity'] }}</h4>
+							</td>
 							<td>
 									<h4 style="float: right; margin-right: 2.6em">Price: ${{ item['price'] }}</h4>
 							</td>
@@ -74,7 +76,10 @@
 										<ul>
 											<li> {{ item['description'] }} </li>
 										</ul>
-											<input type="button" value="Buy Me" style="float: right; margin-right: 5.6em">
+										<form method="get" action="/verifypurchase">
+											<input type="submit" value="Buy Me" style="float: right; margin-right: 5.6em">
+											<input type="hidden" name="item" value="{{item['id']}}" />
+										</form>
 									</td>
 								</tr>
 					</tbody>

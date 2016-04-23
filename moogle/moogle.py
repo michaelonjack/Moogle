@@ -136,7 +136,7 @@ class LoginPage(Handler):
 		current_user = login(username, password)
 		
 		if current_user is not None:
-			self.session['user'] = current_user
+			self.session['user'] = getUser(current_user)
 			self.redirect("/")
 		else:
 			self.render("login.html", error_msg="Username/password combination not found.")
@@ -249,19 +249,6 @@ class VerifyBidder(Handler):
 			self.redirect('/login')
 		else:
 			self.render('verifybidder.html', error_msg="", username=user['username'], user=seller, item=item_id, bid=bid)
-			
-	def post(self):
-		seller = self.request.get('user')
-		item_id = self.request.get('item')
-		bid = self.request.get('bid')
-		user = self.session.get('user')
-		
-		password = self.request.get('password')
-		
-		if password != user['password']:
-			self.render('verifybidder.html', error_msg="Incorrect password", username=user['username'], user=seller, item=item_id, bid=bid)
-		else:
-			self.redirect("/placebid?user=" + seller + "&item=" + item_id + "&bid=" + bid)
 		
 			
 # Action to be performed when a user places a bid
@@ -309,9 +296,52 @@ class PlaceBidAction(Handler):
 
 
 
+
+
+
+
+class VerifyBuyer(Handler):
+	def get(self):
+		item_id = self.request.get('item')
+		user = self.session.get('user')
+		
+		if not user:
+			self.redirect('/login')
+		else:
+			self.render('verifybuyer.html', error_msg="", username=user['username'], item=item_id)
+			
+class VerifyPurchase(Handler):
+	def get(self):
+		item_id = self.request.get('item')
+		user = self.session.get('user')
+		item = getSaleItem(item_id)[0]
+		
+		if not user:
+			self.redirect('/login')
+		else:
+			
+			self.render('verifypurchase.html', buyer=user, item=item)
+			
 # Action to be performed when user buys an item
-
-
+class BuyItemAction(Handler):
+	def post(self):
+		item_id = self.request.get('item')
+		user = self.session.get('user')
+		password = self.request.get('password')
+		item = getSaleItem(item_id)[0]
+		
+		if password == user['password']:
+			insertIntoUsersBuying(user['username'], item_id)
+			decreaseItemQuantity(item_id)
+			
+			# Send email to buyer to confirm purchase
+			message = "Hi " + user['name'] + ".\nThanks for buying " + item['title'] + ". We'll be sure to ship it out eventually or something.\n$" + str(item['price']) + " will be deducted from your card soon.\n\nThanks from Moogle!"
+			mail.send_mail(sender="mooglethestore@gmail.com",to=user['email'],subject="Your Order From Moogle",body=message)
+			
+			self.redirect("/item?id="+ str(item['id']))
+		
+		else:
+			self.render('verifybidder.html', error_msg="Incorrect password", username=user['username'], item=item_id)
 
 
 
@@ -364,6 +394,9 @@ application = webapp2.WSGIApplication([
 	('/search', SearchStoreAction),
 	('/placebid', PlaceBidAction),
 	('/verifybid', VerifyBidder),
+	('/buyitem', BuyItemAction),
+	('/verifybuy', VerifyBuyer),
+	('/verifypurchase', VerifyPurchase),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	
@@ -378,19 +411,4 @@ application = webapp2.WSGIApplication([
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
