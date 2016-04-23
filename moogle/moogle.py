@@ -237,17 +237,41 @@ class SearchStoreAction(Handler):
 
 
 
-
+class VerifyBidder(Handler):
+	def get(self):
+		seller = self.request.get('seller')
+		item_id = self.request.get('item')
+		bid = self.request.get('bid')
+		
+		user = self.session.get('user')
+		
+		if not user:
+			self.redirect('/login')
+		else:
+			self.render('verifybidder.html', error_msg="", username=user['username'], user=seller, item=item_id, bid=bid)
+			
+	def post(self):
+		seller = self.request.get('user')
+		item_id = self.request.get('item')
+		bid = self.request.get('bid')
+		user = self.session.get('user')
+		
+		password = self.request.get('password')
+		
+		if password != user['password']:
+			self.render('verifybidder.html', error_msg="Incorrect password", username=user['username'], user=seller, item=item_id, bid=bid)
+		else:
+			self.redirect("/placebid?user=" + seller + "&item=" + item_id + "&bid=" + bid)
+		
+			
 # Action to be performed when a user places a bid
 class PlaceBidAction(Handler):
 	def post(self):
 	
-		if not self.session.get('user'):
-			self.redirect('/login')
-	
 		seller = cgi.escape(self.request.get('user'))
 		item_id = int(self.request.get('item'))
 		bidder = self.session.get('user')
+		password = self.request.get('password')
 		
 		current_max_bid = getBidForItem(item_id)
 		if not current_max_bid:
@@ -257,25 +281,28 @@ class PlaceBidAction(Handler):
 		
 		bid = self.request.get('bid')
 		if not bid:
-			bid = 0.0
+			bid = 0
 		else:
 			bid = float(bid)
 
-		# get item from database
-		item = getAuctionItem(item_id)
+		if password == bidder['password']:
+			# get item from database
+			item = getAuctionItem(item_id)
 	
-		if not bid:
-			self.render('message.html', message="No bid entered.")
-		elif bid <= current_max_bid:
-			self.render('message.html', message="Bid must be higher than current bid.")
-		elif bidder['username'] == seller:
-			self.render('message.html', message="Seller cannot bid on their own items.")
-		else:
-			insertBid(bidder['username'], item_id, bid)
-			bid = getBidForItem(item_id)
-			updateAuctionBid(item_id, bid['id'])
-			self.redirect("/item?id=" + str(item_id))
+			if not bid:
+				self.render('message.html', message="No bid entered.")
+			elif bid <= current_max_bid:
+				self.render('message.html', message="Bid must be higher than current bid.")
+			elif bidder['username'] == seller:
+				self.render('message.html', message="Seller cannot bid on their own items.")
+			else:
+				insertBid(bidder['username'], item_id, bid)
+				bid = getBidForItem(item_id)
+				updateAuctionBid(item_id, bid['id'])
+				self.redirect("/item?id=" + str(item_id))
 
+		else:
+			self.render('verifybidder.html', error_msg="Incorrect password", username=bidder['username'], user=seller, item=item_id, bid=bid)
 
 
 
@@ -336,6 +363,7 @@ application = webapp2.WSGIApplication([
 	('/signup', SignupPage),
 	('/search', SearchStoreAction),
 	('/placebid', PlaceBidAction),
+	('/verifybid', VerifyBidder),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	

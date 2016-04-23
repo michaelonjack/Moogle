@@ -79,8 +79,10 @@
 										<ul>
 											<li> {{ item['description'] }} </li>
 										</ul>
-											<form method="post" action="/placebid?user={{seller}}&item={{item['id']}}">
+											<form method="get" action="/verifybid">
 												<input type="submit" value="Place Bid" style="float: right; margin-right: 5.6em">
+												<input type="hidden" name="seller" value="{{seller}}" />
+												<input type="hidden" name="item" value="{{item['id']}}" />
 												<input type="text" name="bid" style="float: right;"/>
 											</form>
 
