@@ -113,12 +113,6 @@ class ItemPage(Handler):
 
 
 
-class SellItemPage(Handler):
-	def get(self):
-		self.render("sale_post.html")
-
-
-
 
 
 
@@ -194,7 +188,7 @@ class SignupPage(Handler):
 			insertIntoZipcodeArea(zipcode, city, state)
 			
 			# Send email
-			message = "Hi " + name + "! Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username + "\nhttp://moogle-store.appspot.com"
+			message = "Hi " + name + "!\n\n Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username + "\n\nhttp://moogle-store.appspot.com"
 			mail.send_mail(sender="mooglethestore@gmail.com",to=email,subject="Hi from Moogle!",body=message)
 			self.redirect("/")
 		else:
@@ -231,6 +225,13 @@ class SearchStoreAction(Handler):
 		
 		else:
 			self.render("category.html", currentCategory=category, items=displayedItems, categories=allCategories, user=self.session.get('user'))
+
+
+
+
+
+
+
 
 
 
@@ -335,13 +336,105 @@ class BuyItemAction(Handler):
 			decreaseItemQuantity(item_id)
 			
 			# Send email to buyer to confirm purchase
-			message = "Hi " + user['name'] + ".\nThanks for buying " + item['title'] + ". We'll be sure to ship it out eventually or something.\n$" + str(item['price']) + " will be deducted from your card soon.\n\nThanks from Moogle!"
+			message = "Hi " + user['name'] + ".\n\nThanks for buying " + item['title'] + ". We'll be sure to ship it out eventually or something.\n$" + str(item['price']) + " will be deducted from your card soon.\n\nThanks from Moogle!"
 			mail.send_mail(sender="mooglethestore@gmail.com",to=user['email'],subject="Your Order From Moogle",body=message)
 			
 			self.redirect("/item?id="+ str(item['id']))
 		
 		else:
-			self.render('verifybidder.html', error_msg="Incorrect password", username=user['username'], item=item_id)
+			self.render('verifybuyer.html', error_msg="Incorrect password", username=user['username'], item=item_id)
+
+
+
+
+
+
+
+
+
+class VerifySeller(Handler):
+	def get(self):
+		user = self.session.get('user')
+		
+		title = self.request.get('title')
+		category = self.request.get('category')
+		description = self.request.get('description')
+		image = self.request.get('image')
+		
+		reserve = self.request.get('reserve')
+		end_date = '2016-' + self.request.get('month') + '-' + self.request.get('day')
+		
+		params = dict([
+					('title', urllib.quote(title.encode('utf8'))),
+					('category', urllib.quote(category.encode('utf8'))),
+					('description', urllib.quote(description.encode('utf8'))),
+					('image', urllib.quote(image.encode('utf8'))),
+					('reserve', reserve),
+					('end_date', end_date)
+				])
+		
+		if not user:
+			self.redirect('/login')
+		else:
+			if not title or not category or not description or not image or not end_date:
+				self.render("auction_post.html", msg="DID NOT FILL IN ALL REQUIRED FIELDS", categories=getAllCategories())
+			else:
+				self.render('verifyseller.html', error_msg="", username=user['username'], params=params)
+
+
+class SellItemAction(Handler):
+	def post(self):
+		user = self.session.get('user')
+		
+		title = urllib.unquote(self.request.get('title').decode('utf8'))
+		category = urllib.unquote(self.request.get('category').decode('utf8'))
+		description = urllib.unquote(self.request.get('description').decode('utf8'))
+		image = urllib.unquote(self.request.get('image').decode('utf8'))
+		quantity=1
+		
+		reserve = self.request.get('reserve')
+		if not reserve:
+			reserve=0.0
+		end_date = self.request.get('end_date')
+		
+		password = self.request.get('password')
+		
+		if password == user['password']:
+			
+			insertIntoItems(quantity, category, description, image, title)
+			
+			item_id = None
+			# Get the newly entered item
+			for item in getAllItemsFromCategory(category, getAllCategories()):
+				if item['title']==title and item['description']==description:
+					item_id = item['id']
+					
+			insertIntoUsersSelling(user['username'], item_id)
+			insertIntoAuctionItems(item_id, end_date, reserve)
+			
+			self.redirect("/item?id="+str(item_id))
+		else:
+			params = dict([
+						('title', urllib.quote(title.encode('utf8'))),
+						('category', urllib.quote(category.encode('utf8'))),
+						('description', urllib.quote(description.encode('utf8'))),
+						('image', urllib.quote(image.encode('utf8'))),
+						('reserve', reserve),
+						('end_date', end_date)
+					])
+			
+			self.render('verifyseller.html', error_msg="Incorrect password", username=user['username'], params=params)
+		
+		
+		
+
+class SellItemPage(Handler):
+	def get(self):
+		self.render("auction_post.html", msg="", categories=getAllCategories())
+
+
+
+
 
 
 
@@ -387,7 +480,6 @@ application = webapp2.WSGIApplication([
 	('/', MainPage),
 	(r'/category.*', CategoryPage),
 	(r'/item.*', ItemPage),
-	('/sellitem', SellItemPage),
 	('/login', LoginPage),
 	('/logout', LogoutPage),
 	('/signup', SignupPage),
@@ -397,6 +489,9 @@ application = webapp2.WSGIApplication([
 	('/buyitem', BuyItemAction),
 	('/verifybuy', VerifyBuyer),
 	('/verifypurchase', VerifyPurchase),
+	('/sellitem', SellItemPage),
+	('/sellitemaction', SellItemAction),
+	('/verifyseller', VerifySeller),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	

@@ -8,13 +8,9 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 # Name of the database to connect to "APP-ID:DB-NAME
 _INSTANCE_NAME = 'moogle-store:moogle-db1'
 
-############################## FUNCS #################################################
-# getAllItems
-# getAllSaleItems
-# insertIntoItems
-# getAllCategories
-# getAllItemsFromCategory
-######################################################################################
+
+
+
 
 
 

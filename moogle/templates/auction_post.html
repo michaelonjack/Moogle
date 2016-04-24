@@ -1,0 +1,92 @@
+<DOCTYPE! html>
+
+<html>
+	<head>
+		<link type="text/css" href="/stylesheets/moogle.css" rel="Stylesheet" />
+		<title>sell item</title>
+	</head>
+	
+	<body>
+		<br><br><br>
+		<center>
+			<div class="transparent" style="display:inline-block; width:400px; height:950px;">
+				<form method="get" action="/verifyseller">
+					<center>
+						<h2>sell item.</h3>
+						<br> <br>
+						
+						<div>
+						item name <br>
+						<input type="text" name="title" style="border: 1px solid black; border-radius: 5px;">
+						</div>
+						
+						<br>
+						
+						<div>
+						image url <br>
+						<input type="text" name="image" style="border: 1px solid black; border-radius: 5px;">
+						</div>
+						
+						<br>
+						
+						<div>
+						category <br>
+						<select name="category">
+							{% for category in categories %}
+							<option>{{ category['name'] }}</option>
+							{% endfor %}
+						</select>
+						</div>
+						
+						<br>
+						
+						<div>
+						description <br>
+						<textarea name="description" rows="7" cols="40" style="border:1px solid black;border-radius:5px;"></textarea>
+						</div>
+						
+						<br>
+						
+						<div>
+						reserve <br>
+						<input type="text" name="reserve" style="border: 1px solid black; border-radius: 5px;">
+						</div>
+						
+						<br>
+						
+						<div>
+						auction end date <br>
+						Month:
+						<select name="month"> 
+							{% for _ in range(1, 13) %}
+							<option>{{loop.index}}</option>   
+							{% endfor %}     
+  						</select>
+						Day:
+						<select name="day"> 
+							{% for _ in range(1, 32) %}
+							<option>{{loop.index}}</option>   
+							{% endfor %}     
+  						</select>
+						</div>
+
+						<br>
+						
+						<font color="red">{{ msg }}</font>
+						
+						<br>
+						<div>
+							<input type="submit" value="enter"> <br>
+						</div>
+						
+						<br>
+						<a href="/"> <img src="/images/cow_cash.png" /> </a>
+						
+						<br><br><br><br>
+					</center>
+				</form>
+			</div>
+		</center>
+	</body>
+
+</html>
