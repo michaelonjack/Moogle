@@ -37,9 +37,9 @@ def getAllItems():
 			dict([
 				('id', row[0]),
 				('quantity', row[1]),
-				('category', cgi.escape(row[2])),
-				('description', cgi.escape(row[3])),
-				('image', cgi.escape(row[4])),
+				('category', row[2]),
+				('description', row[3]),
+				('image', row[4]),
 				('title', row[5])
 			])
 		)
@@ -68,10 +68,10 @@ def getAllSaleItems():
 				('id', row[0]),
 				('price', row[1]),
 				('quantity', row[3]),
-				('category', cgi.escape(row[4])),
-				('description', cgi.escape(row[5])),
-				('image', cgi.escape(row[6])),
-				('title', cgi.escape(row[7]))
+				('category', row[4]),
+				('description', row[5]),
+				('image', row[6]),
+				('title', row[7])
 			])
 		)
 				
@@ -98,12 +98,11 @@ def getAllAuctionItems():
 				('id', row[0]),
 				('end_date', row[1]),
 				('reserve', row[2]),
-				('max_bid', row[3]),
-				('quantity', row[5]),
-				('category', cgi.escape(row[6])),
-				('description', row[7]),
-				('image', cgi.escape(row[8])),
-				('title', row[9])
+				('quantity', row[4]),
+				('category', row[5]),
+				('description', row[6]),
+				('image', row[7]),
+				('title', row[8])
 			])
 		)
 				
@@ -176,19 +175,6 @@ def insertIntoItems(quantity, category, description, image, title):
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
 	cursor.execute('INSERT INTO Items (quantity, category, description, image, title) VALUES (%s, %s, %s, %s, %s)', (int(quantity), category, description, image, title))
-	
-	db.commit()
-	db.close()
-	
-
-
-
-
-def updateAuctionBid(item_id, bid_id):
-	db = getDatabase()
-	cursor = db.cursor()
-	
-	cursor.execute('UPDATE Auction_Items SET max_bid=%s WHERE id=%s', (int(bid_id), int(item_id)))
 	
 	db.commit()
 	db.close()
@@ -320,7 +306,28 @@ def insertIntoUserCreditCard(username, number, card_type, date):
 	
 	db.commit()
 	db.close()
+	return True
 	
+
+
+
+
+
+def findCreditCard(number, card_type):
+	db = getDatabase()
+	cursor= db.cursor()
+	cursor.execute('SELECT * FROM User_CreditCard WHERE number=%s AND type=%s', (number, card_type))
+	
+	if len(cursor.fetchall()):
+		db.close()
+		return False
+		
+	else:
+		db.close()
+		return True
+
+
+
 
 
 
@@ -420,9 +427,9 @@ def getAllItemsFromCategory(category, allCategories):
 				dict([
 					('id', row[0]),
 					('quantity', row[1]),
-					('category', cgi.escape(row[2])),
+					('category', row[2]),
 					('description', row[3]),
-					('image', cgi.escape(row[4])),
+					('image', row[4]),
 					('title', row[5])
 				])
 			)
@@ -497,9 +504,9 @@ def getSaleItem(item_id):
 				('id', row[0]),
 				('price', row[1]),
 				('quantity', row[3]),
-				('category', cgi.escape(row[4])),
-				('description', cgi.escape(row[5])),
-				('image', cgi.escape(row[6])),
+				('category', row[4]),
+				('description', row[5]),
+				('image', row[6]),
 				('title', row[7])
 			])
 		)
@@ -522,12 +529,11 @@ def getAuctionItem(item_id):
 				('id', row[0]),
 				('end_date', row[1]),
 				('reserve', row[2]),
-				('max_bid', row[3]),
-				('quantity', row[5]),
-				('category', cgi.escape(row[6])),
-				('description', cgi.escape(row[7])),
-				('image', cgi.escape(row[8])),
-				('title', cgi.escape(row[9]))
+				('quantity', row[4]),
+				('category', row[5]),
+				('description', row[6]),
+				('image', row[7]),
+				('title', row[8])
 			])
 		)
 				
@@ -570,6 +576,25 @@ def decreaseItemQuantity(item_id):
 
 	db.commit()
 	db.close()
+
+
+
+
+
+
+
+
+
+def makeHerdMember(username):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('UPDATE Users SET herd_member=1 WHERE username=%s', (username))
+
+	db.commit()
+	db.close()
+
+
 
 
 

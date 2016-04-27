@@ -33,7 +33,7 @@
 		<div style="text-align:center">
 			<div class="transparent">
 				&nbsp;&nbsp;
-				<a href="/login">Log In</a> | <a href="/signup">Sign Up</a> | <a href="">Herd Member</a> 
+				<a href="/login">Log In</a> | <a href="/signup">Sign Up</a> | <a href="/herdmembership">Herd Member</a> 
 				&nbsp;&nbsp;
 			</div>
 		</div>
@@ -41,7 +41,7 @@
 		<div style="text-align:center">
 			<div class="transparent">
 				&nbsp;&nbsp;
-				<a href=""> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="/sellitem">Sell</a> | <a href="">Herd Member</a> | <a href="/logout">Logout</a>
+				<a href=""> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="/sellitem">Sell</a> | <a href="/herdmembership">Herd Member</a> | <a href="/logout">Logout</a>
 				&nbsp;&nbsp;
 			</div>
 		</div>
@@ -119,18 +119,18 @@
 							<th>Your Stuff</th>
 						</tr>
 						<tr style="text-align:center">
-							<td> <a href="">About Moogle</a> </td>
-							<td> <a href="">Selling on Moogle</a> </td>
+							<td> <a href="/message?title={{urlencode('About Moogle')}}&message={{urlencode('We are an online store.\nThere is a cow.\nThat is all.')}}">About Moogle</a> </td>
+							<td> <a href="/message?title={{urlencode('Selling on Moogle')}}&message={{urlencode('Log in to your account.\nPress the Sell link.')}}">Selling on Moogle</a> </td>
 							<td> <a href="">Your Account</a> </td>
 						</tr>
 						<tr style="text-align:center">
-							<td> <a href="">Who's the Cow?</a> </td>
-							<td> <a href="">Sales vs. Auctions</a> </td>
+							<td> <a href="/message?title={{urlencode('Whos the Cow')}}&message={{urlencode('We dont know. He just showed up and wont go away.')}}">Who's the Cow?</a> </td>
+							<td> <a href="/message?title={{urlencode('Sales vs. Auctions')}}&message={{urlencode('One is a sale and the other is an auction. You already know the difference.')}}">Sales vs. Auctions</a> </td>
 							<td> <a href="">Your Orders</a> </td>
 						</tr>
 						<tr style="text-align:center">
-							<td> <a href="">Member of the Herd</a> </td>
-							<td> <a href="">Making/Receiving Payments</a> </td>
+							<td> <a href="/message?title={{urlencode('Member of the Herd')}}&message={{urlencode('Pay a one-time fee of $60 and get 10% off all sale items.')}}">Member of the Herd</a> </td>
+							<td> <a href="/message?title={{urlencode('Making/Receiving Payments')}}&message={{urlencode('Buy an item and we will deduct its price from your card. Post an auction item and we will add the money you make to your card.')}}">Making/Receiving Payments</a> </td>
 							<td> <a href="">Your Watchlists</a> </td>
 						</tr>
 					</tbody>

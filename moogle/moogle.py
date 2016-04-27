@@ -85,16 +85,23 @@ class CategoryPage(Handler):
 class ItemPage(Handler):
 	def get(self):
 		item_id = str(self.request.get("id"))
+		user = self.session.get('user')
 		sale_item = getSaleItem(item_id)
 		categories = getAllCategories()
 		
 		# Check if the selected item was a sale item or auction item
 		if sale_item:
 			similar_items = getAllItemsFromCategory(sale_item[0]['category'], categories)
+			
+			if user:
+				user['herd_member'] = int(user['herd_member'])
+				if user['herd_member'] == 1:
+					sale_item[0]['price'] = float(sale_item[0]['price']) * .9
+			
 			# Randomize the items to be shown
 			random.shuffle(similar_items)
 			
-			self.render("sale_item.html", item=sale_item[0], related_items=similar_items, user=self.session.get('user'))
+			self.render("sale_item.html", item=sale_item[0], related_items=similar_items, user=user)
 		
 		else:
 			auction_item = getAuctionItem(item_id)
@@ -124,8 +131,8 @@ class LoginPage(Handler):
 		self.render("login.html", error_msg="")
 	
 	def post(self):
-		username = cgi.escape(self.request.get('username'))
-		password = cgi.escape(self.request.get('password'))
+		username = self.request.get('username')
+		password = self.request.get('password')
 		
 		current_user = login(username, password)
 		
@@ -155,24 +162,28 @@ class SignupPage(Handler):
 	def get(self):
 		self.render("signup.html",msg="")
 	def post(self):
-		name = cgi.escape(self.request.get('fullname'))
-		email = cgi.escape(self.request.get('email'))
-		birthdate = cgi.escape(self.request.get('year')) + '-' + cgi.escape(self.request.get('month')) + '-' + cgi.escape(self.request.get('day'))
-		username = cgi.escape(self.request.get('username'))
-		password = cgi.escape(self.request.get('password'))
-		street = cgi.escape(self.request.get('street'))
-		city = cgi.escape(self.request.get('city'))
-		state = cgi.escape(self.request.get('state'))
-		zipcode = cgi.escape(self.request.get('zipcode'))
-		phone = cgi.escape(self.request.get('phone'))
-		card_num = cgi.escape(self.request.get('card_num'))
-		card_type = cgi.escape(self.request.get('card_type'))
-		card_expr_date = cgi.escape(self.request.get('card_year')) + '-' + cgi.escape(self.request.get('card_month'))
-		income = cgi.escape(self.request.get('income'))
-		gender = cgi.escape(self.request.get('gender'))
+		name = self.request.get('fullname')
+		email = self.request.get('email')
+		birthdate = self.request.get('year') + '-' + self.request.get('month') + '-' + self.request.get('day')
+		username = self.request.get('username')
+		password = self.request.get('password')
+		street = self.request.get('street')
+		city = self.request.get('city')
+		state = self.request.get('state')
+		zipcode = self.request.get('zipcode')
+		phone = self.request.get('phone')
+		card_num = self.request.get('card_num')
+		card_type = self.request.get('card_type')
+		card_expr_date = self.request.get('card_year') + '-' + self.request.get('card_month') + '-01'
+		income = self.request.get('income')
+		gender = self.request.get('gender')
 		
 		if not username or not password or not email or not birthdate or not name or not street or not city or not state or not zipcode or not phone or not card_num or not card_type or not income or not gender:
 			self.render("signup.html",msg="DID NOT FILL IN ALL REQUIRED FIELDS")
+		
+		elif not findCreditCard(card_num, card_type):
+			self.render("signup.html",msg="CREDIT CARD ALREADY IN USE")
+		
 		elif insertIntoUsers(name, email, float(income), gender, username, password, birthdate):
 			
 			# insert into address database
@@ -206,7 +217,7 @@ class SignupPage(Handler):
 # Action to be performed when a user enters a search query
 class SearchStoreAction(Handler):
 	def post(self):
-		query = cgi.escape(self.request.get('query'))
+		query = self.request.get('query')
 		category = self.request.get('cat')
 		allCategories = getAllCategories()
 		
@@ -256,7 +267,7 @@ class VerifyBidder(Handler):
 class PlaceBidAction(Handler):
 	def post(self):
 	
-		seller = cgi.escape(self.request.get('user'))
+		seller = self.request.get('user')
 		item_id = int(self.request.get('item'))
 		bidder = self.session.get('user')
 		password = self.request.get('password')
@@ -285,8 +296,7 @@ class PlaceBidAction(Handler):
 				self.render('message.html', message="Seller cannot bid on their own items.")
 			else:
 				insertBid(bidder['username'], item_id, bid)
-				bid = getBidForItem(item_id)
-				updateAuctionBid(item_id, bid['id'])
+				
 				self.redirect("/item?id=" + str(item_id))
 
 		else:
@@ -320,7 +330,8 @@ class VerifyPurchase(Handler):
 		if not user:
 			self.redirect('/login')
 		else:
-			
+			if user['herd_member']==1:
+				item['price'] = item['price'] * .9
 			self.render('verifypurchase.html', buyer=user, item=item)
 			
 # Action to be performed when user buys an item
@@ -334,6 +345,9 @@ class BuyItemAction(Handler):
 		if password == user['password']:
 			insertIntoUsersBuying(user['username'], item_id)
 			decreaseItemQuantity(item_id)
+			
+			if user['herd_member'] == 1:
+				item['price'] = item['price'] * .9
 			
 			# Send email to buyer to confirm purchase
 			message = "Hi " + user['name'] + ".\n\nThanks for buying " + item['title'] + ". We'll be sure to ship it out eventually or something.\n$" + str(item['price']) + " will be deducted from your card soon.\n\nThanks from Moogle!"
@@ -406,6 +420,7 @@ class SellItemAction(Handler):
 			item_id = None
 			# Get the newly entered item
 			for item in getAllItemsFromCategory(category, getAllCategories()):
+				print item
 				if item['title']==title and item['description']==description:
 					item_id = item['id']
 					
@@ -439,6 +454,42 @@ class SellItemPage(Handler):
 
 
 
+class MessagePage(Handler):
+	def get(self):
+		title = self.request.get('title')
+		message = self.request.get('message')
+
+		self.render("message.html", title=title, message=message)
+
+
+
+
+
+
+
+class HerdMember(Handler):
+	def get(self):
+		self.render("herdmember.html", user=self.session.get('user'))
+	def post(self):
+		if self.session.get('user') is None:
+			self.render('login.html')
+		else:
+		
+			user = self.session.get('user')
+		
+			message = "Hi " + user['name'] + ".\n\nThanks for becoming a herd member\n$60 will be deducted from your card soon.\n\nThanks from Moogle!"
+			mail.send_mail(sender="mooglethestore@gmail.com",to=user['email'],subject="Your Order From Moogle",body=message)
+			
+			
+			makeHerdMember(user['username'])
+			self.session['user'] = getUser(user['username'])
+			
+			self.render('confirmherdmember.html')
+		
+
+
+
+
 
 
 
@@ -457,7 +508,6 @@ class TestPagePost(Handler):
 
 		self.redirect("/testpost")
 		
-
 
 
 
@@ -492,6 +542,8 @@ application = webapp2.WSGIApplication([
 	('/sellitem', SellItemPage),
 	('/sellitemaction', SellItemAction),
 	('/verifyseller', VerifySeller),
+	('/message', MessagePage),
+	('/herdmembership', HerdMember),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	

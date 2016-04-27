@@ -47,81 +47,41 @@
 		</div>
 		{% endif %}
 		<br>
-		<div style="text-align:center">
-			<div class="transparent">
-				<h3>&nbsp;&nbsp;&nbsp;Auction&nbsp;&nbsp;&nbsp;</h3>
-			</div>
-		</div>
-
+		
 		<br>
-
+			<center>
 			<div class="transparent" style="vertical-align:top;">
 				<table>
 					<tbody>
 						<tr>
 							<td>
-								<h3> {{ item['title'] }} </h3>
+								<h3>Herd Membership</h3>
 							</td>
 							<td>
-									<h4 style="float: right; margin-right: 2.6em">Seller: {{ seller }}</h4>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ max_bid['amount'] }}</h4>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Ending On: {{ item['end_date'] }}</h4>
+									<h4 style="float: right; margin-right: 2.6em">Price: $60</h4>
 							</td>
 						</tr>
 								<tr>
-									<td> <img class="big_item_pic" src="{{ item['image'] }}"/> </td>
+									<td> <img class="big_item_pic" src="/images/cow_cash.png"/> </td>
 									<td>
 										Description:
 										<ul>
-											<li> {{ item['description'] }} </li>
+											<li> $60 </li>
+											<li> 10% off all sale items forever and ever </li>
+											<li> that's all </li>
 										</ul>
-											<form method="get" action="/verifybid">
-												<input type="submit" value="Place Bid" style="float: right; margin-right: 5.6em">
-												<input type="hidden" name="seller" value="{{seller}}" />
-												<input type="hidden" name="item" value="{{item['id']}}" />
-												<input type="text" name="bid" style="float: right;"/>
-											</form>
-
+										<form method="post">
+											<input type="submit" value="Buy Me" style="float: right; margin-right: 5.6em">
+										</form>
 									</td>
 								</tr>
 					</tbody>
 				</table>
 			</div>
-
-		<div class="transparent" style="width:100%; margin-top: .6em">
-			<table style="border-collapse: collapse;">
-				<tbody>
-					<tr>
-							<th> Related Items:</th>
-					</tr>
-					<tr>
-						{% for related_item in related_items %}
-						<td>
-							<div style="text-align:center; display:table; width:1px;">
-								<a href="/item?id={{ related_item['id'] }}">
-								<figure>
-									<div> <img class="item_pic" src="{{ related_item['image'] }}" /> </div>
-									<figcaption style="text-align: center;"> 
-										{{ related_item['title'] }} </a> <br>
-										({{ related_item['category'] }})
-									</figcaption>
-								</figure>
-							</div>
-						</td>
-							{% if loop.index > 5 %}{% break %}{% endif %}
-						{% endfor %}
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
+			</center>
 	</body>
 
-	<br> <br>
+	<br><br>
 	<footer>
 		<div style="text-align:center">
 			<div id="footer-table" class="transparent">
