@@ -128,6 +128,18 @@ def insertIntoSaleItems(_id, price):
 
 
 
+def getUserSelling(username):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT item_id from Users_Selling WHERE user=%s', (username))
+	
+	item_ids = []
+	for row in cursor.fetchall():
+		item_ids.append(row[0])
+		
+	db.close()
+	return item_ids
 
 
 def insertIntoUsersSelling(username, item_id):
@@ -140,6 +152,18 @@ def insertIntoUsersSelling(username, item_id):
 	db.close()
 	
 	
+def getUserBuying(username):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT item_id from Users_Buying WHERE user=%s', (username))
+	
+	item_ids = []
+	for row in cursor.fetchall():
+		item_ids.append(row[0])
+		
+	db.close()
+	return item_ids
 
 def insertIntoUsersBuying(username, item_id):
 	db = getDatabase()
@@ -149,6 +173,85 @@ def insertIntoUsersBuying(username, item_id):
 
 	db.commit()
 	db.close()
+
+
+
+
+
+
+
+
+
+def addItemToWatchlist(username, watchlist_name, item):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT * FROM Watchlist_Items WHERE watchlist=%s AND item=%s AND owner=%s', (watchlist_name, int(item), username))
+	
+	if len(cursor.fetchall()) > 0:
+		db.close()
+		return
+		
+	else:
+		cursor.execute('INSERT INTO Watchlist_Items (watchlist, item, owner) VALUES (%s, %s, %s)', (watchlist_name, int(item), username))
+		
+	db.commit()
+	db.close()
+	
+	
+	
+
+def insertWatchlistForUser(username, watchlist_name):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT * FROM Watchlists WHERE owner=%s AND name=%s', (username, watchlist_name))
+	if len(cursor.fetchall()) > 0:
+		db.close()
+		return False
+	
+	cursor.execute('INSERT INTO Watchlists (name, owner) VALUES (%s, %s)', (watchlist_name, username))
+	
+	db.commit()
+	db.close()
+	return True
+
+
+
+def getWatchlistsForUser(username):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT name FROM Watchlists WHERE owner=%s', (username))
+	
+	names = [] 
+	for row in cursor.fetchall():
+		names.append(row[0])
+		
+	db.close()
+	return names
+
+
+
+def getWatchlistItems(username, name):
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT item FROM Watchlist_Items WHERE watchlist=%s AND owner=%s', (name, username))
+	
+	item_ids = []
+	for row in cursor.fetchall():
+		item_ids.append(row[0])
+		
+	db.close()
+	return item_ids
+	
+
+
+
+
+
+
 
 
 
@@ -490,7 +593,24 @@ def getUser(username):
 	
 				
 				
-
+def getItem(item_id):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT * FROM Items WHERE id=%s", (item_id))
+	
+	row = cursor.fetchone()
+	item = dict([
+				('id', row[0]),
+				('quantity', row[1]),
+				('category', row[2]),
+				('description', row[3]),
+				('image', row[4]),
+				('title', row[5])
+			])	
+		
+	db.close()
+		
+	return item
 
 def getSaleItem(item_id):
 	db = getDatabase()

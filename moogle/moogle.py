@@ -472,7 +472,7 @@ class HerdMember(Handler):
 		self.render("herdmember.html", user=self.session.get('user'))
 	def post(self):
 		if self.session.get('user') is None:
-			self.render('login.html')
+			self.redirect('/login')
 		else:
 		
 			user = self.session.get('user')
@@ -488,6 +488,98 @@ class HerdMember(Handler):
 		
 
 
+
+
+
+class UserBuyingSelling(Handler):
+	def get(self):
+		buying = int(self.request.get('buying'))
+		user = self.session['user']
+		
+		if buying:
+			item_ids = getUserBuying(user['username'])
+				
+		else:
+			item_ids = getUserSelling(user['username'])
+			
+		
+		items = []
+		for _id in item_ids:
+			items.append(getItem(_id))
+		
+		self.render('itemdisplay.html', user=user, items=items, _type=buying, name="")
+		
+
+class MyAccountPage(Handler):
+	def get(self):
+		user = self.session['user']
+		
+		if user is not None:
+			self.render('user_account.html', user=user)
+			
+		else:
+			self.redirect('/login')
+
+
+
+
+
+
+
+
+class AddToWatchlistPage(Handler):
+	def get(self):
+		user = self.session['user']
+		item = self.request.get('item')
+		
+		if user is None:
+			self.redirect('/login')
+		
+		else:
+			watchlists = getWatchlistsForUser(user['username'])
+			self.render('addtowatchlist.html', user=user, watchlists=watchlists, item=item)
+			
+	def post(self):
+		user = self.session['user']
+		name = self.request.get('name')
+		item = self.request.get('item')
+		
+		addItemToWatchlist(user['username'], name, item)
+		
+		self.redirect('/item?id='+item)
+
+class UserWatchlistsPage(Handler):
+	def get(self):
+		user = self.session['user']
+		name = self.request.get('name')
+		
+		if not name:
+			watchlists = getWatchlistsForUser(user['username'])
+			self.render('choosewatchlist.html', user=user, watchlists=watchlists, error_msg="")
+
+		else:
+			item_ids = getWatchlistItems(user['username'], name)
+			items = []
+			for _id in item_ids:
+				items.append(getItem(_id))
+			
+			self.render('itemdisplay.html', user=user, items=items, _type=2, name=name)
+			
+	def post(self):
+		user = self.session['user']
+		name = self.request.get('name')
+			
+		if not name:
+			watchlists = getWatchlistsForUser(user['username'])
+			self.render('choosewatchlist.html', user=user, watchlists=watchlists, error_msg="DID NOT ENTER A NAME")
+			
+		elif insertWatchlistForUser(user['username'], name):
+			watchlists = getWatchlistsForUser(user['username'])
+			self.render('choosewatchlist.html', user=user, watchlists=watchlists, error_msg="")
+
+		else:
+			watchlists = getWatchlistsForUser(user['username'])
+			self.render('choosewatchlist.html', user=user, watchlists=watchlists, error_msg="WATCHLIST NAME ALREADY EXISTS")
 
 
 
@@ -544,6 +636,10 @@ application = webapp2.WSGIApplication([
 	('/verifyseller', VerifySeller),
 	('/message', MessagePage),
 	('/herdmembership', HerdMember),
+	('/myaccount', MyAccountPage),
+	('/myaccount/buyingselling', UserBuyingSelling),
+	('/myaccount/watchlists', UserWatchlistsPage),
+	('/addtowatchlist', AddToWatchlistPage),
 	('/testpost', TestPagePost),
 	], debug=True, config=config)
 	

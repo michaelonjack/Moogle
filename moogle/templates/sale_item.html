@@ -41,7 +41,7 @@
 		<div style="text-align:center">
 			<div class="transparent">
 				&nbsp;&nbsp;
-				<a href=""> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="/sellitem">Sell</a> | <a href="/herdmembership">Herd Member</a> | <a href="/logout">Logout</a>
+				<a href="/myaccount"> {{ user['username'] }} ({{ user['name'] }})</a> | <a href="/sellitem">Sell</a> | <a href="/herdmembership">Herd Member</a> | <a href="/logout">Logout</a>
 				&nbsp;&nbsp;
 			</div>
 		</div>
@@ -86,8 +86,12 @@
 											<li> {{ item['description'] }} </li>
 										</ul>
 										<form method="get" action="/verifypurchase">
-											<input type="submit" value="Buy Me" style="float: right; margin-right: 5.6em">
+											<input type="submit" value="Buy Me">
 											<input type="hidden" name="item" value="{{item['id']}}" />
+										</form>
+										<form method="get" action="/addtowatchlist">
+											<input type="submit" value="Add to Watchlist" >
+											<input type="hidden" value="{{item['id']}}" name="item" />
 										</form>
 									</td>
 								</tr>
@@ -138,7 +142,7 @@
 						<tr style="text-align:center">
 							<td> <a href="/message?title={{urlencode('About Moogle')}}&message={{urlencode('We are an online store.\nThere is a cow.\nThat is all.')}}">About Moogle</a> </td>
 							<td> <a href="/message?title={{urlencode('Selling on Moogle')}}&message={{urlencode('Log in to your account.\nPress the Sell link.')}}">Selling on Moogle</a> </td>
-							<td> <a href="">Your Account</a> </td>
+							<td> <a href="/myaccount">Your Account</a> </td>
 						</tr>
 						<tr style="text-align:center">
 							<td> <a href="/message?title={{urlencode('Whos the Cow')}}&message={{urlencode('We dont know. He just showed up and wont go away.')}}">Who's the Cow?</a> </td>

@@ -15,19 +15,19 @@
 		</center>
 		
 	</head>
-
+	
 	<body>
-
+		
 		<!-- HTML for search bar / button -->
-		<div style="text-align:center;">
-			<div id="search">
-				<form action="/search" method="post">
+		<div style="text-align:center">
+			<div id="search"> 
+				<form action="/search?cat=All" method="post">
 					<input type="text" name="query">
-					<input type="submit" name="searchButton" value="search">
+					<input type="submit" name="searchButton" value="search"> 
 				</form>
 			</div>
 		</div>
-
+		
 		<!-- Login / Sign Up html -->
 		{% if user is none %}
 		<div style="text-align:center">
@@ -46,87 +46,63 @@
 			</div>
 		</div>
 		{% endif %}
+		
 		<br>
+		{% if _type == 1 %}
 		<div style="text-align:center">
 			<div class="transparent">
-				<h3>&nbsp;&nbsp;&nbsp;Auction&nbsp;&nbsp;&nbsp;</h3>
+				<h3>&nbsp;&nbsp;&nbsp;Items You're Buying&nbsp;&nbsp;&nbsp;</h3>
 			</div>
 		</div>
-
-		<br>
-
-			<div class="transparent" style="vertical-align:top;">
-				<table>
-					<tbody>
-						<tr>
-							<td>
-								<h3> {{ item['title'] }} </h3>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Seller: {{ seller }}</h4>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Current Price: ${{ max_bid['amount'] }}</h4>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Ending On: {{ item['end_date'] }}</h4>
-							</td>
-						</tr>
-						<tr>
-							<td> <img class="big_item_pic" src="{{ item['image'] }}"/> </td>
-							<td>
-								Description:
-								<ul>
-									<li> {{ item['description'] }} </li>
-								</ul>
-									
-								<form method="get" action="/verifybid">
-									<input type="text" name="bid"/>
-									<input type="submit" value="Place Bid">
-									<input type="hidden" name="seller" value="{{seller}}" />
-									<input type="hidden" name="item" value="{{item['id']}}" />
-								</form>
-								
-								<form method="get" action="/addtowatchlist">
-									<input type="submit" value="Add to Watchlist">
-									<input type="hidden" value="{{item['id']}}" name="item" />
-								</form>	
-							</td>
-						</tr>
-					</tbody>
-				</table>
+		
+		{% elif _type == 0 %}
+		<div style="text-align:center">
+			<div class="transparent">
+				<h3>&nbsp;&nbsp;&nbsp;Items You're Selling&nbsp;&nbsp;&nbsp;</h3>
 			</div>
-
-		<div class="transparent" style="width:100%; margin-top: .6em">
+		</div>
+		{% else %}
+		<div style="text-align:center">
+			<div class="transparent">
+				<h3>&nbsp;&nbsp;&nbsp;Watchlist: {{ name }}&nbsp;&nbsp;&nbsp;</h3>
+			</div>
+		</div>
+		{% endif %}
+		
+		<br>
+		
+		<!-- HTML for the items -->
+		<center>
+		<div id="items-table" class="transparent">
 			<table style="border-collapse: collapse;">
 				<tbody>
 					<tr>
-							<th> Related Items:</th>
-					</tr>
-					<tr>
-						{% for related_item in related_items %}
+					{% for item in items %}
 						<td>
 							<div style="text-align:center; display:table; width:1px;">
-								<a href="/item?id={{ related_item['id'] }}">
+								<a href="/item?id={{ item['id'] }}">
 								<figure>
-									<div> <img class="item_pic" src="{{ related_item['image'] }}" /> </div>
+									<div> <img class="item_pic" src="{{ item['image'] }}" /> </div>
 									<figcaption style="text-align: center;"> 
-										{{ related_item['title'] }} </a> <br>
-										({{ related_item['category'] }})
+										{{ item['title'] }} </a> <br>
+										({{ item['category'] }})
 									</figcaption>
 								</figure>
-							</div>
+							</div
 						</td>
-							{% if loop.index > 5 %}{% break %}{% endif %}
-						{% endfor %}
+						
+						{% if loop.index%5 == 0 %}
+							</tr> <tr>
+						{% endif %}
+					{% endfor %}
 					</tr>
 				</tbody>
 			</table>
 		</div>
-
+		</center>
 	</body>
-
-	<br> <br>
+	
+	<br><br>
 	<footer>
 		<div style="text-align:center">
 			<div id="footer-table" class="transparent">
@@ -140,7 +116,7 @@
 						<tr style="text-align:center">
 							<td> <a href="/message?title={{urlencode('About Moogle')}}&message={{urlencode('We are an online store.\nThere is a cow.\nThat is all.')}}">About Moogle</a> </td>
 							<td> <a href="/message?title={{urlencode('Selling on Moogle')}}&message={{urlencode('Log in to your account.\nPress the Sell link.')}}">Selling on Moogle</a> </td>
-							<td> <a href="/myaccount">Your Account</a> </td>
+							<td> <a href="/myacount">Your Account</a> </td>
 						</tr>
 						<tr style="text-align:center">
 							<td> <a href="/message?title={{urlencode('Whos the Cow')}}&message={{urlencode('We dont know. He just showed up and wont go away.')}}">Who's the Cow?</a> </td>
@@ -157,5 +133,5 @@
 			</div> 
 		</div>
 	</footer>
-
+	
 </html>
