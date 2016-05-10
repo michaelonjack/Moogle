@@ -91,6 +91,7 @@ __all__ = [
     'MAXIMUM_EXPRESSION_LENGTH',
     'MAXIMUM_FIELD_ATOM_LENGTH',
     'MAXIMUM_FIELD_NAME_LENGTH',
+    'MAXIMUM_FIELD_PREFIX_LENGTH',
     'MAXIMUM_FIELD_VALUE_LENGTH',
     'MAXIMUM_FIELDS_RETURNED_PER_SEARCH',
     'MAXIMUM_GET_INDEXES_OFFSET',
@@ -122,12 +123,17 @@ __all__ = [
     'TextField',
     'Timeout',
     'TIMESTAMP_FIELD_NAME',
+    'TokenizedPrefixField',
     'TransientError',
+    'UntokenizedPrefixField',
+    'VECTOR_FIELD_MAX_SIZE',
+    'VectorField',
     ]
 
 MAXIMUM_INDEX_NAME_LENGTH = 100
 MAXIMUM_FIELD_VALUE_LENGTH = 1024 * 1024
 MAXIMUM_FIELD_ATOM_LENGTH = 500
+MAXIMUM_FIELD_PREFIX_LENGTH = 500
 MAXIMUM_FIELD_NAME_LENGTH = 500
 MAXIMUM_DOCUMENT_ID_LENGTH = 500
 MAXIMUM_DOCUMENTS_PER_PUT_REQUEST = 200
@@ -144,6 +150,7 @@ MAXIMUM_NUMBER_FOUND_ACCURACY = 25000
 MAXIMUM_FIELDS_RETURNED_PER_SEARCH = 1000
 MAXIMUM_INDEXES_RETURNED_PER_GET_REQUEST = 1000
 MAXIMUM_GET_INDEXES_OFFSET = 1000
+VECTOR_FIELD_MAX_SIZE = 10000
 
 
 DOCUMENT_ID_FIELD_NAME = '_doc_id'
@@ -180,9 +187,12 @@ MAX_NUMBER_VALUE = 2147483647
 MIN_NUMBER_VALUE = -2147483647
 
 
-_PROTO_FIELDS_STRING_VALUE = frozenset([document_pb.FieldValue.TEXT,
-                                        document_pb.FieldValue.HTML,
-                                        document_pb.FieldValue.ATOM])
+_PROTO_FIELDS_STRING_VALUE = frozenset(
+    [document_pb.FieldValue.TEXT,
+     document_pb.FieldValue.HTML,
+     document_pb.FieldValue.ATOM,
+     document_pb.FieldValue.UNTOKENIZED_PREFIX,
+     document_pb.FieldValue.TOKENIZED_PREFIX])
 
 
 class Error(Exception):
@@ -518,6 +528,29 @@ def _CheckNumber(value, name, should_be_finite=False):
   return value
 
 
+def _CheckVector(value):
+  """Checks whether vector value is of valid type and size.
+
+  Args:
+    value: the value to check.
+
+  Returns:
+    The checked value.
+
+  Raises:
+    TypeError: if any of vector elements are not a number.
+    ValueError: if the size of the vector is greater than VECTOR_FIELD_MAX_SIZE
+      or any of vector elements are not finite.
+  """
+  if value is None:
+    return
+  if len(value) > VECTOR_FIELD_MAX_SIZE:
+    raise ValueError('vector size must be less than %d' % VECTOR_FIELD_MAX_SIZE)
+  for d in value:
+    _CheckNumber(d, 'vector value', True)
+  return value
+
+
 def _CheckStatus(status):
   """Checks whether a RequestStatus has a value of OK.
 
@@ -724,6 +757,12 @@ def _CheckAtom(atom):
                          empty_ok=True)
 
 
+def _CheckPrefix(prefix):
+  """Checks if the untokenized or tokenized prefix field is a valid string."""
+  return _ValidateString(prefix, 'prefix', MAXIMUM_FIELD_PREFIX_LENGTH,
+                         empty_ok=True)
+
+
 def _CheckDate(date):
   """Checks the date is in the correct range."""
   if isinstance(date, datetime.datetime):
@@ -756,15 +795,16 @@ def _CheckDocument(document):
   """Check that the document is valid.
 
   This checks for all server-side requirements on Documents. Currently, that
-  means ensuring that there are no repeated number or date fields.
+  means ensuring that there are no repeated number, date, or vector fields.
 
   Args:
     document: The search.Document to check for validity.
 
   Raises:
-    ValueError if the document is invalid in a way that would trigger an
-    PutError from the server.
+    ValueError: if the document is invalid in a way that would trigger
+      a PutError from the server.
   """
+  no_repeat_vector_names = set()
   no_repeat_date_names = set()
   no_repeat_number_names = set()
   for field in document.fields:
@@ -780,6 +820,12 @@ def _CheckDocument(document):
             'Invalid document %s: field %s with type date or number may not '
             'be repeated.' % (document.doc_id, field.name))
       no_repeat_date_names.add(field.name)
+    elif isinstance(field, VectorField):
+      if field.name in no_repeat_vector_names:
+        raise ValueError(
+            'Invalid document %s: field %s with type vector may not '
+            'be repeated.' % (document.doc_id, field.name))
+      no_repeat_vector_names.add(field.name)
 
 
 def _CheckSortLimit(limit):
@@ -898,10 +944,13 @@ class Field(object):
   """
 
 
-  TEXT, HTML, ATOM, DATE, NUMBER, GEO_POINT = ('TEXT', 'HTML', 'ATOM', 'DATE',
-                                               'NUMBER', 'GEO_POINT')
+  (TEXT, HTML, ATOM, DATE, NUMBER, GEO_POINT, UNTOKENIZED_PREFIX,
+   TOKENIZED_PREFIX, VECTOR) = ('TEXT', 'HTML', 'ATOM', 'DATE', 'NUMBER',
+                                'GEO_POINT', 'UNTOKENIZED_PREFIX',
+                                'TOKENIZED_PREFIX', 'VECTOR')
 
-  _FIELD_TYPES = frozenset([TEXT, HTML, ATOM, DATE, NUMBER, GEO_POINT])
+  _FIELD_TYPES = frozenset([TEXT, HTML, ATOM, DATE, NUMBER, GEO_POINT,
+                            UNTOKENIZED_PREFIX, TOKENIZED_PREFIX, VECTOR])
 
   def __init__(self, name, value, language=None):
     """Initializer.
@@ -1114,7 +1163,7 @@ def _NewFacetFromPb(pb):
   """Constructs a Facet from a document_pb.Facet protocol buffer."""
   name = _DecodeUTF8(pb.name())
   val_type = pb.value().type()
-  value = _DecodeValue(_GetValue(pb.value()), val_type)
+  value = _DecodeValue(_GetFacetValue(pb.value()), val_type)
   if val_type == document_pb.FacetValue.ATOM:
     return AtomFacet(name, value)
   elif val_type == document_pb.FacetValue.NUMBER:
@@ -1470,8 +1519,99 @@ class AtomField(Field):
     self._CopyStringValueToProtocolBuffer(field_value_pb)
 
 
+class VectorField(Field):
+  """A vector field that can be used in a dot product expression.
+
+  The following example shows a vector field named scores:
+    VectorField(name='scores', value=[1, 2, 3])
+  That can be used in a sort/field expression like this:
+    dot(scores, vector(3, 2, 1))
+  """
+
+  def __init__(self, name, value=None):
+    """Initializer.
+
+    Args:
+      name: The name of the field.
+      value: The vector field value.
+
+    Raises:
+      TypeError: If vector elements are not numbers.
+      ValueError: If value elements are not finite numbers.
+    """
+    Field.__init__(self, name, _GetList(value))
+
+  def _CheckValue(self, value):
+    return _CheckVector(value)
+
+  def _CopyValueToProtocolBuffer(self, field_value_pb):
+    field_value_pb.set_type(document_pb.FieldValue.VECTOR)
+    for d in self.value:
+      field_value_pb.add_vector_value(d)
+
+
+class UntokenizedPrefixField(Field):
+  """A field that matches searches on prefixes of the whole field.
+
+  The following example shows an untokenized prefix field named title:
+    UntokenizedPrefixField(name='title', value='how to swim freestyle')
+  """
+
+  def __init__(self, name, value=None, language=None):
+    """Initializer.
+
+    Args:
+      name: The name of the field.
+      value: The untokenized prefix field value.
+      language: The code of the language the value is encoded in.
+
+    Raises:
+      TypeError: If value is not a string.
+      ValueError: If value is longer than allowed.
+    """
+    Field.__init__(self, name, _ConvertToUnicode(value), language)
+
+  def _CheckValue(self, value):
+    return _CheckPrefix(value)
+
+  def _CopyValueToProtocolBuffer(self, field_value_pb):
+    field_value_pb.set_type(document_pb.FieldValue.UNTOKENIZED_PREFIX)
+    self._CopyStringValueToProtocolBuffer(field_value_pb)
+
+
+class TokenizedPrefixField(Field):
+  """A field that matches searches on prefixes of its individual terms.
+
+  The following example shows a tokenized prefix field named title:
+    TokenizedPrefixField(name='title', value='Goodwill Hunting')
+  """
+
+  def __init__(self, name, value=None, language=None):
+    """Initializer.
+
+    Args:
+      name: The name of the field.
+      value: The tokenized prefix field value.
+      language: The code of the language the value is encoded in.
+
+    Raises:
+      TypeError: If value is not a string.
+      ValueError: If value is longer than allowed.
+    """
+    Field.__init__(self, name, _ConvertToUnicode(value), language)
+
+  def _CheckValue(self, value):
+    return _CheckPrefix(value)
+
+  def _CopyValueToProtocolBuffer(self, field_value_pb):
+    field_value_pb.set_type(document_pb.FieldValue.TOKENIZED_PREFIX)
+    self._CopyStringValueToProtocolBuffer(field_value_pb)
+
+
 class DateField(Field):
   """A Field that has a date or datetime value.
+
+  Only Python "naive" date or datetime values may be used (not "aware" values).
 
   The following example shows a date field named creation_date:
     DateField(name='creation_date', value=datetime.date(2011, 03, 11))
@@ -1622,6 +1762,19 @@ class GeoField(Field):
     geo_pb.set_lng(self.value.longitude)
 
 
+def _GetFacetValue(value_pb):
+  """Gets the value from the facet value_pb."""
+  if value_pb.type() == document_pb.FacetValue.ATOM:
+    if value_pb.has_string_value():
+      return value_pb.string_value()
+    return None
+  if value_pb.type() == document_pb.FieldValue.NUMBER:
+    if value_pb.has_string_value():
+      return float(value_pb.string_value())
+    return None
+  raise TypeError('unknown FacetValue type %d' % value_pb.type())
+
+
 def _GetValue(value_pb):
   """Gets the value from the value_pb."""
   if value_pb.type() in _PROTO_FIELDS_STRING_VALUE:
@@ -1641,12 +1794,18 @@ def _GetValue(value_pb):
       geo_pb = value_pb.geo()
       return GeoPoint(latitude=geo_pb.lat(), longitude=geo_pb.lng())
     return None
+  if value_pb.type() == document_pb.FieldValue.VECTOR:
+    if value_pb.vector_value_size():
+      return value_pb.vector_value_list()
+    return None
   raise TypeError('unknown FieldValue type %d' % value_pb.type())
 
 
 _STRING_TYPES = set([document_pb.FieldValue.TEXT,
                      document_pb.FieldValue.HTML,
-                     document_pb.FieldValue.ATOM])
+                     document_pb.FieldValue.ATOM,
+                     document_pb.FieldValue.UNTOKENIZED_PREFIX,
+                     document_pb.FieldValue.TOKENIZED_PREFIX])
 
 
 def _DecodeUTF8(pb_value):
@@ -1677,12 +1836,18 @@ def _NewFieldFromPb(pb):
     return HtmlField(name, value, lang)
   elif val_type == document_pb.FieldValue.ATOM:
     return AtomField(name, value, lang)
+  elif val_type == document_pb.FieldValue.UNTOKENIZED_PREFIX:
+    return UntokenizedPrefixField(name, value, lang)
+  elif val_type == document_pb.FieldValue.TOKENIZED_PREFIX:
+    return TokenizedPrefixField(name, value, lang)
   elif val_type == document_pb.FieldValue.DATE:
     return DateField(name, value)
   elif val_type == document_pb.FieldValue.NUMBER:
     return NumberField(name, value)
   elif val_type == document_pb.FieldValue.GEO:
     return GeoField(name, value)
+  elif val_type == document_pb.FieldValue.VECTOR:
+    return VectorField(name, value)
   return InvalidRequest('Unknown field value type %d' % val_type)
 
 
@@ -3841,9 +4006,12 @@ _FIELD_TYPE_MAP = {
     document_pb.FieldValue.TEXT: Field.TEXT,
     document_pb.FieldValue.HTML: Field.HTML,
     document_pb.FieldValue.ATOM: Field.ATOM,
+    document_pb.FieldValue.UNTOKENIZED_PREFIX: Field.UNTOKENIZED_PREFIX,
+    document_pb.FieldValue.TOKENIZED_PREFIX: Field.TOKENIZED_PREFIX,
     document_pb.FieldValue.DATE: Field.DATE,
     document_pb.FieldValue.NUMBER: Field.NUMBER,
     document_pb.FieldValue.GEO: Field.GEO_POINT,
+    document_pb.FieldValue.VECTOR: Field.VECTOR,
     }
 
 

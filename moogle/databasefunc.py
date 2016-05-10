@@ -169,12 +169,30 @@ def insertIntoUsersBuying(username, item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('INSERT INTO Users_Buying (user, item_id) VALUES (%s, %s)', (username, int(item_id)))
+	cursor.execute('SELECT * FROM Users_Buying WHERE user=%s AND item_id=%s', (username, int(item_id)))
+	
+	if len(cursor.fetchall()) > 0:
+		cursor.execute('UPDATE Users_Buying SET quantity=quantity+1 WHERE user=%s AND item_id=%s', (username, int(item_id)))
+	
+	else:
+		cursor.execute('INSERT INTO Users_Buying (user, item_id, quantity) VALUES (%s, %s, %s)', (username, int(item_id), 1))
 
 	db.commit()
 	db.close()
 
 
+
+
+
+
+def getNewestItem():
+	db = getDatabase()
+	cursor = db.cursor()
+	
+	cursor.execute('SELECT max(id) from Items')
+	
+	db.close()
+	return cursor.fetchone()[0]
 
 
 

@@ -186,6 +186,9 @@ class SignupPage(Handler):
 		
 		elif insertIntoUsers(name, email, float(income), gender, username, password, birthdate):
 			
+			# insert into zipcodes database
+			insertIntoZipcodeArea(zipcode, city, state)
+			
 			# insert into address database
 			insertIntoUserAddress(username, street, zipcode)
 			
@@ -194,9 +197,6 @@ class SignupPage(Handler):
 			
 			# insert into phone number database
 			insertIntoUserPhoneNumber(username, phone)
-			
-			# insert into zipcodes database
-			insertIntoZipcodeArea(zipcode, city, state)
 			
 			# Send email
 			message = "Hi " + name + "!\n\n Welcome to Moogle. Hope you have a lot of fun!\nYour username is " + username + "\n\nhttp://moogle-store.appspot.com"
@@ -417,12 +417,7 @@ class SellItemAction(Handler):
 			
 			insertIntoItems(quantity, category, description, image, title)
 			
-			item_id = None
-			# Get the newly entered item
-			for item in getAllItemsFromCategory(category, getAllCategories()):
-				print item
-				if item['title']==title and item['description']==description:
-					item_id = item['id']
+			item_id = getNewestItem()
 					
 			insertIntoUsersSelling(user['username'], item_id)
 			insertIntoAuctionItems(item_id, end_date, reserve)
