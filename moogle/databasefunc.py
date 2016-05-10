@@ -4,22 +4,22 @@ import jinja2
 import webapp2
 import MySQLdb
 from google.appengine.ext.webapp.util import run_wsgi_app
-
-# Name of the database to connect to "APP-ID:DB-NAME
-_INSTANCE_NAME = 'moogle-store:moogle-db1'
-
-
-
-
-
+from helpers import get_config
 
 
 def getDatabase():
 	# Connect to database
+	
+	config = get_config()
+	config.read('auth.ini')
+	instance = config.get('credentials', 'instance')
+	db = config.get('credentials', 'db')
+	passw = config.get('credentials', 'pass')
+	
 	if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'): 
-		db = MySQLdb.connect(unix_socket='/cloudsql/' + _INSTANCE_NAME, db='moogle', user='root', passwd='moogle', charset='utf8')
+		db = MySQLdb.connect(unix_socket='/cloudsql/' + instance, db=db, user='root', passwd=passw, charset='utf8')
 	else:
-		db = MySQLdb.connect(host='173.194.233.233', port=3306, db='moogle', user='root', passwd='moogle', charset='utf8')
+		db = MySQLdb.connect(host='173.194.233.233', port=3306, db=db, user='root', passwd=passw, charset='utf8')
 	
 	return db
 
