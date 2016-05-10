@@ -1,0 +1,21 @@
+application: moogle-store
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /js
+  static_dir: js
+- url: /images
+  static_dir: images
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /.*
+  script: moogle.application
+
+libraries:
+- name: jinja2
+  version: "latest"
+- name: MySQLdb
+  version: "latest"
