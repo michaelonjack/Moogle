@@ -55,49 +55,46 @@
 		
 		<br>
 
-			<div class="transparent" style="vertical-align:top;">
-				<table>
-					<tbody>
-						<tr>
-							<td>
-								<h3>{{ item['title'] }}</h3>
-							</td>
-							<td>
-									<h4 style="float: right; margin-right: 2.6em">Quantity: {{ item['quantity'] }}</h4>
-									
-							</td>
-							<td>
-									{% if user %}
-									{% if user['herd_member'] == 1 %}
-									<h4 style="color: red; float: right; margin-right: 2.6em">Herd Price: ${{ item['price'] }}</h4>
-									{% else %}
-									<h4 style="float: right; margin-right: 2.6em">Price: ${{ item['price'] }}</h4>
-									{% endif %}
-									{% else %}
-									<h4 style="float: right; margin-right: 2.6em">Price: ${{ item['price'] }}</h4>
-									{% endif %}
-							</td>
-						</tr>
-								<tr>
-									<td> <img class="big_item_pic" src="{{ item['image'] }}"/> </td>
-									<td>
-										Description:
-										<ul>
-											<li> {{ item['description'] }} </li>
-										</ul>
-										<form method="get" action="/verifypurchase">
-											<input type="submit" value="Buy Me">
-											<input type="hidden" name="item" value="{{item['id']}}" />
-										</form>
-										<form method="get" action="/addtowatchlist">
-											<input type="submit" value="Add to Watchlist" >
-											<input type="hidden" value="{{item['id']}}" name="item" />
-										</form>
-									</td>
-								</tr>
-					</tbody>
-				</table>
-			</div>
+		<div class="transparent" style="vertical-align:top;">
+			<h3>{{ item['title'] }}</h3>
+							
+			<img style="float:left" class="big_item_pic" src="{{ item['image'] }}"/> </td>
+			
+			{% if user %}
+				{% if user['herd_member'] == 1 %}
+					<b style="color: red;">Herd Price: ${{ item['price'] }}</b>
+				
+				{% else %}
+					<b>Price: ${{ item['price'] }}</b>
+				
+				{% endif %}
+			
+			{% else %}
+				<b>Price: ${{ item['price'] }}</b>
+			
+			{% endif %}
+			
+			<br>
+			
+			<b>Quantity: {{ item['quantity'] }}</b>
+			
+			<br><br>
+			
+			<b>Description:</b>
+			 {{ item['description'] }} </li>
+			 
+			 <br><br>
+			
+			<form method="get" action="/verifypurchase">
+				<input type="submit" value="Buy Me">
+				<input type="hidden" name="item" value="{{item['id']}}" />
+			</form>
+			
+			<form method="get" action="/addtowatchlist">
+				<input type="submit" value="Add to Watchlist" >
+				<input type="hidden" value="{{item['id']}}" name="item" />
+			</form>
+		</div>
 
 		<div class="transparent" style="width:100%; margin-top: .6em">
 			<table style="border-collapse: collapse;">

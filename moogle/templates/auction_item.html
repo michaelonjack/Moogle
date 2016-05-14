@@ -55,61 +55,61 @@
 
 		<br>
 
-			<div class="transparent" style="vertical-align:top; width:100%;">
-				<h2> {{ item['title'] }} </h2>
+		<div class="transparent" style="vertical-align:top; width:100%;">
+			<h2> {{ item['title'] }} </h2>
 				
-				<img style="float:left" class="big_item_pic" src="{{ item['image'] }}"/>
+			<img style="float:left" class="big_item_pic" src="{{ item['image'] }}"/>
 				
-				<br>
+			<br>
 				
-				<div id="clockdiv">
-					<div>
-						<span class="days"></span>
-						<div class="smalltext">Days</div>
-					</div>
-					<div>
-						<span class="hours"></span>
-						<div class="smalltext">Hours</div>
-					</div>
-					<div>
-						<span class="minutes"></span>
-						<div class="smalltext">Minutes</div>
-					</div>
-					<div>
-						<span class="seconds"></span>
-						<div class="smalltext">Seconds</div>
-					</div>
+			<div id="clockdiv">
+				<div>
+					<span class="days"></span>
+					<div class="smalltext">Days</div>
 				</div>
-								
-				<input type="hidden" id="enddate" value="{{ item['end_date'] }}" />
-				<script src="/js/timer.js"></script>
-				
-				<br><br><br>
-				
-				<b>Seller: {{ seller }}</b> <br>
-				<b>Current Price: ${{ max_bid['amount'] }}</b>	
-				
-				<br><br>
-				
-				<form method="get" action="/verifybid">
-					<input type="text" name="bid"/>
-					<input type="submit" value="Place Bid">
-					<input type="hidden" name="seller" value="{{seller}}" />
-					<input type="hidden" name="item" value="{{item['id']}}" />
-				</form>
-								
-				<form method="get" action="/addtowatchlist">
-					<input type="submit" value="Add to Watchlist">
-					<input type="hidden" value="{{item['id']}}" name="item" />
-				</form>	
-				
-				<div style="float:left">
-					<br><br>
-					<b>Description:</b> <br>
-					{{ item['description'] }}
-					<br><br>
+				<div>
+					<span class="hours"></span>
+					<div class="smalltext">Hours</div>
+				</div>
+				<div>
+					<span class="minutes"></span>
+					<div class="smalltext">Minutes</div>
+				</div>
+				<div>
+					<span class="seconds"></span>
+					<div class="smalltext">Seconds</div>
 				</div>
 			</div>
+								
+			<input type="hidden" id="enddate" value="{{ item['end_date'] }}" />
+			<script src="/js/timer.js"></script>
+				
+			<br><br><br>
+				
+			<b>Seller: {{ seller }}</b> <br>
+			<b>Current Price: ${{ max_bid['amount'] }}</b>	
+				
+			<br><br>
+				
+			<form method="get" action="/verifybid">
+				<input type="text" name="bid"/>
+				<input type="submit" value="Place Bid">
+				<input type="hidden" name="seller" value="{{seller}}" />
+				<input type="hidden" name="item" value="{{item['id']}}" />
+			</form>
+								
+			<form method="get" action="/addtowatchlist">
+				<input type="submit" value="Add to Watchlist">
+				<input type="hidden" value="{{item['id']}}" name="item" />
+ 			</form>	
+				
+			<div style="float:left">
+				<br><br>
+				<b>Description:</b> <br>
+				{{ item['description'] }}
+				<br><br>
+			</div>
+		</div>
 
 		<div class="transparent" style="width:100%; margin-top: .6em">
 			<table style="border-collapse: collapse;">
