@@ -489,7 +489,7 @@ class HerdMember(Handler):
 class UserBuyingSelling(Handler):
 	def get(self):
 		buying = int(self.request.get('buying'))
-		user = self.session['user']
+		user = self.session.get('user')
 		
 		if buying:
 			item_ids = getUserBuying(user['username'])
@@ -507,7 +507,7 @@ class UserBuyingSelling(Handler):
 
 class MyAccountPage(Handler):
 	def get(self):
-		user = self.session['user']
+		user = self.session.get('user')
 		
 		if user is not None:
 			self.render('user_account.html', user=user)
@@ -524,7 +524,7 @@ class MyAccountPage(Handler):
 
 class AddToWatchlistPage(Handler):
 	def get(self):
-		user = self.session['user']
+		user = self.session.get('user')
 		item = self.request.get('item')
 		
 		if user is None:
@@ -535,7 +535,7 @@ class AddToWatchlistPage(Handler):
 			self.render('addtowatchlist.html', user=user, watchlists=watchlists, item=item)
 			
 	def post(self):
-		user = self.session['user']
+		user = self.session.get('user')
 		name = self.request.get('name')
 		item = self.request.get('item')
 		
@@ -545,7 +545,7 @@ class AddToWatchlistPage(Handler):
 
 class UserWatchlistsPage(Handler):
 	def get(self):
-		user = self.session['user']
+		user = self.session.get('user')
 		name = self.request.get('name')
 		
 		if not name:
@@ -561,7 +561,7 @@ class UserWatchlistsPage(Handler):
 			self.render('itemdisplay.html', user=user, items=items, _type=2, name=name)
 			
 	def post(self):
-		user = self.session['user']
+		user = self.session.get('user')
 		name = self.request.get('name')
 			
 		if not name:

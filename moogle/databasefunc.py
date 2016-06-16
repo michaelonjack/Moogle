@@ -329,7 +329,7 @@ def getSellerOfItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Users_Selling WHERE item_id=%s', (int(item_id)))
+	cursor.execute('SELECT * FROM Users_Selling WHERE item_id=%s', (int(item_id),))
 	
 	row = cursor.fetchone()
 	if row is not None:
@@ -349,7 +349,7 @@ def getBidForItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Bids WHERE item=%s', (int(item_id)))
+	cursor.execute('SELECT * FROM Bids WHERE item=%s', (int(item_id),))
 	
 	row = cursor.fetchone()
 	if row is not None:
@@ -703,14 +703,14 @@ def getItemSeller(item_id):
 def decreaseItemQuantity(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute('SELECT quantity FROM Items WHERE id=%s', (int(item_id)))
+	cursor.execute('SELECT quantity FROM Items WHERE id=%s', (int(item_id),))
 	quantity = cursor.fetchone()[0]
 	
 	# Check to make sure there is more than one of the item, otherwise delete it from the table
 	if quantity > 1:
-		cursor.execute('UPDATE Items SET quantity=quantity-1 WHERE id=%s', (item_id))
+		cursor.execute('UPDATE Items SET quantity=quantity-1 WHERE id=%s', (int(item_id),))
 	else:
-		cursor.execute('DELETE FROM Items WHERE id=%s', (int(item_id)))
+		cursor.execute('DELETE FROM Items WHERE id=%s', (int(item_id),))
 
 	db.commit()
 	db.close()
