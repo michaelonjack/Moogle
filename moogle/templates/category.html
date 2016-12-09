@@ -4,6 +4,10 @@
 	
 	<head>
 		<link type="text/css" href="/stylesheets/moogle.css" rel="Stylesheet" />
+		<script type="text/javascript" src="/js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/ajaxItemSearch.js"></script>
+
 		<title>moogle</title>
 		
 		<center>
@@ -22,7 +26,8 @@
 		<div style="text-align:center">
 			<div id="search"> 
 				<form action="/search?cat={{urlencode(currentCategory)}}" method="post">
-					<input type="text" name="query">
+					<input type="text" name="query" id="searchBar" list="json-list">
+					<datalist id="json-list"></datalist>
 					<input type="submit" name="searchButton" value="search"> 
 				</form>
 			</div>

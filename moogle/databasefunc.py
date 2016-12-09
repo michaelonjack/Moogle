@@ -51,8 +51,23 @@ def getAllItems():
 	
 
 
+def getAllItemNamesLike(q):
+	db = getDatabase()
+	cursor = db.cursor()
+	cursor.execute("SELECT title FROM Items WHERE title LIKE '%" + q + "%' LIMIT 15")
 
-
+	names = []
+	for row in cursor.fetchall():
+		names.append( 
+			dict([
+				('title', row[0])
+			])
+		)
+				
+		
+	db.close()
+		
+	return names
 
 
 def getAllSaleItems():
@@ -121,7 +136,7 @@ def insertIntoSaleItems(_id, price):
 	db = getDatabase()
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
-	cursor.execute('INSERT INTO Sale_Items (id, price) VALUES (%s, %s)', (int(_id), float(price)))
+	cursor.execute('INSERT INTO Sale_Items (id, price) VALUES (%s, %s)', [int(_id), float(price)])
 	
 	db.commit()
 	db.close()
@@ -132,7 +147,7 @@ def getUserSelling(username):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT item_id from Users_Selling WHERE user=%s', (username))
+	cursor.execute('SELECT item_id from Users_Selling WHERE user=%s', [username])
 	
 	item_ids = []
 	for row in cursor.fetchall():
@@ -146,7 +161,7 @@ def insertIntoUsersSelling(username, item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('INSERT INTO Users_Selling (user, item_id) VALUES (%s, %s)', (username, int(item_id)))
+	cursor.execute('INSERT INTO Users_Selling (user, item_id) VALUES (%s, %s)', [username, int(item_id)])
 
 	db.commit()
 	db.close()
@@ -156,7 +171,7 @@ def getUserBuying(username):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT item_id from Users_Buying WHERE user=%s', (username))
+	cursor.execute('SELECT item_id from Users_Buying WHERE user=%s', [username])
 	
 	item_ids = []
 	for row in cursor.fetchall():
@@ -169,13 +184,13 @@ def insertIntoUsersBuying(username, item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Users_Buying WHERE user=%s AND item_id=%s', (username, int(item_id)))
+	cursor.execute('SELECT * FROM Users_Buying WHERE user=%s AND item_id=%s', [username, int(item_id)])
 	
 	if len(cursor.fetchall()) > 0:
-		cursor.execute('UPDATE Users_Buying SET quantity=quantity+1 WHERE user=%s AND item_id=%s', (username, int(item_id)))
+		cursor.execute('UPDATE Users_Buying SET quantity=quantity+1 WHERE user=%s AND item_id=%s', [username, int(item_id)])
 	
 	else:
-		cursor.execute('INSERT INTO Users_Buying (user, item_id, quantity) VALUES (%s, %s, %s)', (username, int(item_id), 1))
+		cursor.execute('INSERT INTO Users_Buying (user, item_id, quantity) VALUES (%s, %s, %s)', [username, int(item_id), 1])
 
 	db.commit()
 	db.close()
@@ -204,14 +219,14 @@ def addItemToWatchlist(username, watchlist_name, item):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Watchlist_Items WHERE watchlist=%s AND item=%s AND owner=%s', (watchlist_name, int(item), username))
+	cursor.execute('SELECT * FROM Watchlist_Items WHERE watchlist=%s AND item=%s AND owner=%s', [watchlist_name, int(item), username])
 	
 	if len(cursor.fetchall()) > 0:
 		db.close()
 		return
 		
 	else:
-		cursor.execute('INSERT INTO Watchlist_Items (watchlist, item, owner) VALUES (%s, %s, %s)', (watchlist_name, int(item), username))
+		cursor.execute('INSERT INTO Watchlist_Items (watchlist, item, owner) VALUES (%s, %s, %s)', [watchlist_name, int(item), username])
 		
 	db.commit()
 	db.close()
@@ -223,12 +238,12 @@ def insertWatchlistForUser(username, watchlist_name):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Watchlists WHERE owner=%s AND name=%s', (username, watchlist_name))
+	cursor.execute('SELECT * FROM Watchlists WHERE owner=%s AND name=%s', [username, watchlist_name])
 	if len(cursor.fetchall()) > 0:
 		db.close()
 		return False
 	
-	cursor.execute('INSERT INTO Watchlists (name, owner) VALUES (%s, %s)', (watchlist_name, username))
+	cursor.execute('INSERT INTO Watchlists (name, owner) VALUES (%s, %s)', [watchlist_name, username])
 	
 	db.commit()
 	db.close()
@@ -240,7 +255,7 @@ def getWatchlistsForUser(username):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT name FROM Watchlists WHERE owner=%s', (username))
+	cursor.execute('SELECT name FROM Watchlists WHERE owner=%s', [username])
 	
 	names = [] 
 	for row in cursor.fetchall():
@@ -255,7 +270,7 @@ def getWatchlistItems(username, name):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT item FROM Watchlist_Items WHERE watchlist=%s AND owner=%s', (name, username))
+	cursor.execute('SELECT item FROM Watchlist_Items WHERE watchlist=%s AND owner=%s', [name, username])
 	
 	item_ids = []
 	for row in cursor.fetchall():
@@ -278,7 +293,7 @@ def insertIntoAuctionItems(_id, end_date, reserve):
 	db = getDatabase()
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
-	cursor.execute('INSERT INTO Auction_Items (id, end_date, reserve) VALUES (%s, %s, %s)', (int(_id), end_date, float(reserve)))
+	cursor.execute('INSERT INTO Auction_Items (id, end_date, reserve) VALUES (%s, %s, %s)', [int(_id), end_date, float(reserve)])
 	
 	db.commit()
 	db.close()
@@ -295,7 +310,7 @@ def insertIntoItems(quantity, category, description, image, title):
 	db = getDatabase()
 	cursor = db.cursor()
     # Note that the only format specifier supported is %s
-	cursor.execute('INSERT INTO Items (quantity, category, description, image, title) VALUES (%s, %s, %s, %s, %s)', (int(quantity), category, description, image, title))
+	cursor.execute('INSERT INTO Items (quantity, category, description, image, title) VALUES (%s, %s, %s, %s, %s)', [int(quantity), category, description, image, title])
 	
 	db.commit()
 	db.close()
@@ -309,14 +324,14 @@ def insertBid(username, item, amount):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Bids WHERE username=%s AND item=%s', (username, int(item)))
+	cursor.execute('SELECT * FROM Bids WHERE username=%s AND item=%s', [username, int(item)])
 	
 	# A bid for this item already exists, update the amount
 	if len(cursor.fetchall()) > 0:
-		cursor.execute('UPDATE Bids SET amount=%s, username=%s WHERE item=%s', (float(amount), username, int(item)))
+		cursor.execute('UPDATE Bids SET amount=%s, username=%s WHERE item=%s', [float(amount), username, int(item)])
 	# No bids for this item yet, enter it into the table
 	else:
-		cursor.execute('INSERT INTO Bids (username,item,amount) VALUES (%s,%s,%s)', (username, int(item), float(amount)))
+		cursor.execute('INSERT INTO Bids (username,item,amount) VALUES (%s,%s,%s)', [username, int(item), float(amount)])
 	
 	db.commit()
 	db.close()
@@ -329,7 +344,7 @@ def getSellerOfItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Users_Selling WHERE item_id=%s', (int(item_id),))
+	cursor.execute('SELECT * FROM Users_Selling WHERE item_id=%s', [int(item_id),])
 	
 	row = cursor.fetchone()
 	if row is not None:
@@ -349,7 +364,7 @@ def getBidForItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('SELECT * FROM Bids WHERE item=%s', (int(item_id),))
+	cursor.execute('SELECT * FROM Bids WHERE item=%s', [int(item_id),])
 	
 	row = cursor.fetchone()
 	if row is not None:
@@ -373,14 +388,14 @@ def getBidForItem(item_id):
 def insertIntoUsers(name, email, income, gender, username, password, birthdate):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Users WHERE username='" + username + "'")
+	cursor.execute("SELECT * FROM Users WHERE username=%s", [username])
 
 	# User already exists
 	if len(cursor.fetchall()) > 0:
 		return False
 		
 	else:
-		cursor.execute('INSERT INTO Users (name, email, herd_member, income, gender, username, password, birth_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (name, email, 0, (float(income)), gender, username, password, birthdate))
+		cursor.execute('INSERT INTO Users (name, email, herd_member, income, gender, username, password, birth_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', [name, email, 0, (float(income)), gender, username, password, birthdate])
 	
 	db.commit()
 	db.close()
@@ -395,7 +410,7 @@ def insertIntoUserAddress(username, street, zipcode):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('INSERT INTO User_Address (username, street, zipcode) VALUES (%s, %s, %s)', (username,street,zipcode))
+	cursor.execute('INSERT INTO User_Address (username, street, zipcode) VALUES (%s, %s, %s)', [username,street,zipcode])
 	
 	db.commit()
 	db.close()
@@ -410,7 +425,7 @@ def insertIntoUserPhoneNumber(username, number):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('INSERT INTO User_PhoneNumber (username, phone_number) VALUES (%s, %s)', (username,number))
+	cursor.execute('INSERT INTO User_PhoneNumber (username, phone_number) VALUES (%s, %s)', [username,number])
 	
 	db.commit()
 	db.close()
@@ -423,7 +438,7 @@ def insertIntoUserCreditCard(username, number, card_type, date):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('INSERT INTO User_CreditCard (username, number, type, expiration_date) VALUES (%s, %s, %s, %s)', (username,number,card_type,date))
+	cursor.execute('INSERT INTO User_CreditCard (username, number, type, expiration_date) VALUES (%s, %s, %s, %s)', [username,number,card_type,date])
 	
 	db.commit()
 	db.close()
@@ -437,7 +452,7 @@ def insertIntoUserCreditCard(username, number, card_type, date):
 def findCreditCard(number, card_type):
 	db = getDatabase()
 	cursor= db.cursor()
-	cursor.execute('SELECT * FROM User_CreditCard WHERE number=%s AND type=%s', (number, card_type))
+	cursor.execute('SELECT * FROM User_CreditCard WHERE number=%s AND type=%s', [number, card_type])
 	
 	if len(cursor.fetchall()):
 		db.close()
@@ -458,7 +473,7 @@ def findCreditCard(number, card_type):
 def insertIntoZipcodeArea(zipcode, city, state):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Zipcodes_Areas WHERE zipcode='" + zipcode + "'")
+	cursor.execute("SELECT * FROM Zipcodes_Areas WHERE zipcode=%s", [zipcode])
 
 	# Zipcode already exists
 	if len(cursor.fetchall()) > 0:
@@ -466,7 +481,7 @@ def insertIntoZipcodeArea(zipcode, city, state):
 		return False
 	
 	
-	cursor.execute("INSERT INTO Zipcodes_Areas (zipcode, city, state) VALUES (%s, %s, %s)", (zipcode,city,state))
+	cursor.execute("INSERT INTO Zipcodes_Areas (zipcode, city, state) VALUES (%s, %s, %s)", [zipcode,city,state])
 	
 	db.commit()
 	db.close()
@@ -564,7 +579,7 @@ def getAllItemsFromCategory(category, allCategories):
 def getUser(username):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Users U INNER JOIN User_Address A on U.username=A.username AND U.username=%s INNER JOIN User_PhoneNumber P on U.username=P.username INNER JOIN Zipcodes_Areas Z on Z.zipcode=A.zipcode INNER JOIN User_CreditCard C on C.username=U.username", (username))
+	cursor.execute("SELECT * FROM Users U INNER JOIN User_Address A on U.username=A.username AND U.username=%s INNER JOIN User_PhoneNumber P on U.username=P.username INNER JOIN Zipcodes_Areas Z on Z.zipcode=A.zipcode INNER JOIN User_CreditCard C on C.username=U.username", [username])
 	
 	row = cursor.fetchone()
 	if row is not None:
@@ -590,7 +605,7 @@ def getUser(username):
 		return user
 				
 	else:
-		cursor.execute("SELECT * FROM Users WHERE username='" + username + "'")
+		cursor.execute("SELECT * FROM Users WHERE username=%s", [username])
 	
 		row = cursor.fetchone()
 		if row is not None:
@@ -614,7 +629,7 @@ def getUser(username):
 def getItem(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute("SELECT * FROM Items WHERE id=%s", (item_id))
+	cursor.execute("SELECT * FROM Items WHERE id=%s", [item_id])
 	
 	row = cursor.fetchone()
 	item = dict([
@@ -703,7 +718,7 @@ def getItemSeller(item_id):
 def decreaseItemQuantity(item_id):
 	db = getDatabase()
 	cursor = db.cursor()
-	cursor.execute('SELECT quantity FROM Items WHERE id=%s', (int(item_id),))
+	cursor.execute('SELECT quantity FROM Items WHERE id=%s', [int(item_id),])
 	quantity = cursor.fetchone()[0]
 	
 	# Check to make sure there is more than one of the item, otherwise delete it from the table
@@ -727,7 +742,7 @@ def makeHerdMember(username):
 	db = getDatabase()
 	cursor = db.cursor()
 	
-	cursor.execute('UPDATE Users SET herd_member=1 WHERE username=%s', (username))
+	cursor.execute('UPDATE Users SET herd_member=1 WHERE username=%s', [username])
 
 	db.commit()
 	db.close()

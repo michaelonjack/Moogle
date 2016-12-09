@@ -1,6 +1,7 @@
 import os
 import cgi
 import jinja2
+import json
 import webapp2
 import MySQLdb
 import urllib
@@ -80,7 +81,31 @@ class CategoryPage(Handler):
 
 
 
-		
+
+class AJAXitemSearchResults(Handler):
+	def get(self):
+		self.response.headers['Content-Type'] = 'application/json' 
+
+		searchTerm = selectedCategory = self.request.get("q")
+
+		items = getAllItemNamesLike(searchTerm);
+		jsonResponse = "{ \"data\": ["
+
+		firstRecord = True
+		for item in items:
+			name = item['title']
+			if not firstRecord:
+				jsonResponse += " , ";
+			else:
+				firstRecord = False
+
+			jsonResponse += " { \"Name\" : "
+			jsonResponse += "\"" + name + "\""
+			jsonResponse += " } "
+
+		jsonResponse += "]}"
+
+		self.response.out.write(jsonResponse)
 
 class ItemPage(Handler):
 	def get(self):
@@ -636,6 +661,7 @@ application = webapp2.WSGIApplication([
 	('/myaccount/watchlists', UserWatchlistsPage),
 	('/addtowatchlist', AddToWatchlistPage),
 	('/testpost', TestPagePost),
+	('/ajaxitemsearchresults', AJAXitemSearchResults),
 	], debug=True, config=config)
 	
 	
